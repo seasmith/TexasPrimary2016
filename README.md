@@ -1,8 +1,9 @@
-###The 2016 Texas Primary
+##The 2016 Texas Primary
 
 This repo is dedicated toward examining the data from the 2016 Texas Presidential Primary. Most of the code in `TexasPrimary2016.R` comes from [this post on R-Bloggers](http://www.r-bloggers.com/mapping-election-results-with-r-and-choroplethr/) (by way of [R. Duncan McIntosh](http://rduncanmcintosh.com/) and his [post on Ari Lamstein's blog](http://www.arilamstein.com/blog/2016/03/21/mapping-election-results-r-choroplethr/))  
 You will need to run the `TexasPrimary2016.R` script to run the examples in `examples.R`.
 
+###Getting the Election Data
 Data scraping files
 * `TexasPrimary2016.R` = will scrape data from the Texas secretary of state's election data website
 
@@ -11,6 +12,7 @@ Data exploration files
   * Dependencies
     * `TexasPrimary2016.R`
 
+###Getting the Economic Data
 I am in the process of adding some economic data from FRED (Federal Reserve's Economic Data).  
 I am in the early stages of adding the data. The data will be county level data.    
 So far I have two functions that will scrape data from FRED (YOU WILL NEED AN API KEY FROM FRED).  
