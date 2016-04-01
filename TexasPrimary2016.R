@@ -6,11 +6,10 @@ library(choroplethrMaps)
 library(gridExtra)
 library(knitr)
 
-#Texas election data: http://elections.sos.state.tx.us/index.htm
+# Texas election data: http://elections.sos.state.tx.us/index.htm
 
 
-
-# Download Data - Republicans ---------------------------------------------
+# Republican Data Table ---------------------------------------------------
 
 
 #download
@@ -42,7 +41,28 @@ tex.rep <- mutate(tex.rep,
 tex.rep[,19:22] <- round(tex.rep[,19:22], digits = 1)
 
 
-# Download Data - Democrats -----------------------------------------------
+# Individual Republican Data Table ----------------------------------------
+
+
+#John Kasich
+jk.counties <- filter(tx.r.results, Kasich > Cruz & Kasich > Trump & Kasich > Rubio)
+kable(jk.counties, caption = "Counties won by Kasich")
+
+#Marco Rubio
+mr.counties <- filter(tx.r.results, Rubio > Cruz & Rubio > Trump & Rubio > Kasich)
+kable(mr.counties, caption = "Counties won by Rubio")
+
+#Donald Trump
+dt.counties <- filter(tx.r.results, Trump > Cruz & Trump > Rubio & Trump > Kasich) %>%
+    select(1,19:22)
+kable(dt.counties, caption = "Counties won by Trump")
+
+#Ted Cruz
+tc.counties <- filter(tx.r.results, Cruz > Trump & Cruz > Rubio & Cruz > Kasich)
+kable(tc.counties, caption = "Counties won by Cruz")
+
+
+# Democratic Data Table ---------------------------------------------------
 
 
 #download
@@ -72,45 +92,9 @@ tex.dem <- mutate(tex.dem,
                   mo = (OMalley/TotalVotes)*100
 )
 tex.dem[,13:15] <- round(tex.dem[,13:15], digits = 1)
-#####-----Democrats
 
 
-
-# Download Data - Geo -----------------------------------------------------
-
-
-#get state geo data
-data("county.regions")
-tx.regions <- filter(county.regions, state.name == "texas") %>%
-              select(region, "CountyName" = county.name)
-tx.r.results <- left_join(tex.rep, tx.regions)
-tx.d.results <- left_join(tex.dem, tx.regions)
-#####-----Geo Data
-
-
-
-# Tabling Data - Republicans ----------------------------------------------
-
-
-#John Kasich
-jk.counties <- filter(tx.r.results, Kasich > Cruz & Kasich > Trump & Kasich > Rubio)
-kable(jk.counties, caption = "Counties won by Kasich")
-
-#Marco Rubio
-mr.counties <- filter(tx.r.results, Rubio > Cruz & Rubio > Trump & Rubio > Kasich)
-kable(mr.counties, caption = "Counties won by Rubio")
-
-#Donald Trump
-dt.counties <- filter(tx.r.results, Trump > Cruz & Trump > Rubio & Trump > Kasich) %>%
-               select(1,19:22)
-kable(dt.counties, caption = "Counties won by Trump")
-
-#Ted Cruz
-tc.counties <- filter(tx.r.results, Cruz > Trump & Cruz > Rubio & Cruz > Kasich)
-kable(tc.counties, caption = "Counties won by Cruz")
-
-
-# Tabling Data - Democrats ------------------------------------------------
+# Individual Democrat Data Table ------------------------------------------
 
 
 #Hillary Clinton
@@ -120,61 +104,36 @@ kable(hc.counties, caption = "Counties won by Clinton")
 #Bernie Sanders
 bs.counties <- filter(tx.d.results, Sanders > Clinton & Sanders > OMalley)
 kable(bs.counties, caption = "Counties won by Sanders")
-#####-----Democrats
 
 
-
-# Maps - Republican -------------------------------------------------------
-
-
-#Ted Cruz
-tx.r.tc       <- tx.r.results
-tx.r.tc$value <- tx.r.results$tc
-choro_tc      <- county_choropleth(tx.r.tc, state_zoom="texas", legend = "%", num_colors=1) + 
-                 ggtitle("Ted Cruz") +
-                 coord_map()  # Adds a Mercator projection
-choro_tc
-
-#Donald Trump
-tx.r.dt       <- tx.r.results
-tx.r.dt$value <- tx.r.results$dt
-choro_dt = county_choropleth(tx.r.dt, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Donald Trump") +
-    coord_map()  # Adds a Mercator projection
-choro_dt
-
-#John Kasich
-tx.r.jk       <- tx.r.results
-tx.r.jk$value <- tx.r.results$jk
-choro_jk = county_choropleth(tx.r.jk, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("John Kasich") +
-    coord_map()  # Adds a Mercator projection
-choro_jk
-
-#Marco Rubio
-tx.r.mr       <- tx.r.results
-tx.r.mr$value <- tx.r.results$mr
-choro_mr = county_choropleth(tx.r.mr, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Marco Rubio") +
-    coord_map()  # Adds a Mercator projection
-choro_mr
+# Master Data Table -------------------------------------------------------
 
 
-# Maps - Democrats --------------------------------------------------------
+#tidy up
+tex.results                 <- left_join(tex.rep, tex.dem, "CountyName")
+tex.results                 <- mutate(tex.results, TotalVotes = (TotalVotes.x + TotalVotes.y),
+                                      TotalTurnOut = (TotalVotes/TotalVoters.x)*100,
+                                      RepShare = (TotalVotes.x/TotalVotes)*100,
+                                      DemShare = (TotalVotes.y/TotalVotes)*100)
+tex.results                 <- tex.results[, -c(2:15, 23:30)]
+tex.results[,16:18]         <- round(tex.results[,16:18], digits = 1)
+tex.results                 <- left_join(tex.results, tx.regions, "CountyName")
+names(tex.results)[2:4]     <- c("RepVotes", "TotalVoters", "RepTurnOut")
+names(tex.results)[c(9,11)] <- c("DemVotes", "DemTurnOut")
+tex.results                 <- select(tex.results, c(CountyName, TotalVotes, TotalVoters,
+                                                     TotalTurnOut, RepVotes, RepTurnOut, RepShare,
+                                                     jk, mr, dt, tc, DemVotes, DemTurnOut,
+                                                     DemShare, hc, bs, mo, region))
+#turn out
+tex.turnout       <- tex.results
+tex.turnout$value <- tex.turnout$TotalTurnOut
 
 
-#Hillary Clinton
-tx.d.hc       <- tx.d.results
-tx.d.hc$value <- tx.d.results$hc
-choro_hc = county_choropleth(tx.d.hc, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Hillary Clinton") +
-    coord_map()  # Adds a Mercator projection
-choro_hc
+# Download Data - Geo -----------------------------------------------------
 
-#Bernie Sanders
-tx.d.bs       <- tx.d.results
-tx.d.bs$value <- tx.d.results$bs
-choro_bs = county_choropleth(tx.d.bs, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Bernie Sanders") +
-    coord_map()  # Adds a Mercator projection
-choro_bs
+
+data("county.regions")
+tx.regions   <- filter(county.regions, state.name == "texas") %>%
+                select(region, "CountyName" = county.name)
+tx.r.results <- left_join(tex.rep, tx.regions, "CountyName")
+tx.d.results <- left_join(tex.dem, tx.regions, "CountyName")

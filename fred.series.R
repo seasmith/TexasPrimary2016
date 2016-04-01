@@ -1,23 +1,33 @@
+# This function will retrieve the meta data for each series within the specified release.
+# You MUST enter a 'key' (your FRED API)
+# You MUST enter an 'id' (a number corresponding to a release)
+# You MAY choose to enter filters (character vector of 'tags' which will restrict the results)
+# A data frame will be returned which can act as a master/top-level table
+
 fred.series <- function(key = NULL, id = NULL, filters = NULL){
     
-    if(is.null(key)){
-        stop("An API 'key' is required!")
-    }
-    if(is.null(id)){
-        stop("You must input a character vector corresponding to a release's 'id'")
-    }
+            if(is.null(key)){
+                stop("An API 'key' is required!")
+            }
+            if(is.null(id)){
+                stop("You must input a character vector corresponding to a release's 'id'")
+            }
+    
     root    <- "https://api.stlouisfed.org/fred/release/series?release_id="
     cred    <- "&api_key="
-    if(!is.null(filters)){
-        filter  <- paste("&tag_names=",
-                         paste(filters, collapse = ";"),
-                         sep = ""
-        )
-        url    <- paste(root, id, cred, key, filter, sep = "")
-        
-    }   else {
-        url <- paste(root, id, cred, key, sep = "")
-    }
+    
+            if(!is.character(id)) {
+                id <- as.character(id)
+            }
+            if(!is.null(filters)){
+                filter <- paste("&tag_names=",
+                                paste(filters, collapse = ";"),
+                                sep = ""
+                )
+                url    <- paste(root, id, cred, key, filter, sep = "")
+            }   else {
+                url    <- paste(root, id, cred, key, sep = "")
+            }
     
     html               <- url %>% read_html()
     series             <- html %>% html_nodes("series")
