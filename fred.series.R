@@ -5,13 +5,16 @@
 # A data frame will be returned which can act as a master/top-level table
 
 fred.series <- function(key = NULL, id = NULL, filters = NULL){
-    
+            
             if(is.null(key)){
                 stop("An API 'key' is required!")
             }
             if(is.null(id)){
                 stop("You must input a character vector corresponding to a release's 'id'")
             }
+    
+            source("county.scraper.R")
+            source("category.scraper.R")
     
     root    <- "https://api.stlouisfed.org/fred/release/series?release_id="
     cred    <- "&api_key="
@@ -55,4 +58,5 @@ fred.series <- function(key = NULL, id = NULL, filters = NULL){
     )
     data.info$County   <- county.scraper(title)
     data.info$Category <- category.scraper(title)
+    data.info
 }
