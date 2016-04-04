@@ -104,6 +104,7 @@ fred.series2[fred.series2$Category == uis2[[2]], 'Category'] <- uis2[[1]]
 fred.series2[fred.series2$Category == uis2[[4]], 'Category'] <- uis2[[3]]
 fred.series2[fred.series2$Category == uis2[[6]], 'Category'] <- uis2[[5]]
 
+
 # Run the Data Function ---------------------------------------------------
 
 #run 1
