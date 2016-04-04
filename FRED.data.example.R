@@ -57,7 +57,7 @@ fred.data2 <- lapply(seq_along(fred.input2), function(x){
     })
 }) %>% ldply()
 
-# remediation
+# clean up
     right.counties <- c("Deaf Smith", "El Paso", "Fort Bend",
                         "Jeff Davis", "Jim Hogg", "Jim Wells",
                         "La Salle","Live Oak", "Palo Pinto",
@@ -95,9 +95,30 @@ fred.data2[fred.data2$Category == uis2[[6]], 'Category'] <- uis2[[5]]
 
 # Run the Data Function ---------------------------------------------------
 
+#run 1
+fred.test1 <- lapply(seq_along(fred.data1$SeriesID), function(x){
+    
+    tryCatch({
+        print(x)
+        fred.data(myapi,fred.data1$SeriesID[x])
+    }, error = function(e) {
+        
+        tryCatch({
+            Sys.sleep(3.5)
+            fred.data(myapi,fred.data1$SeriesID[x])
+        }, error = function(e) {
+            Sys.sleep(3.5)
+            fred.data(myapi,fred.data1$SeriesID[x])
+        })
+    })
+})
 
-fred.test <- lapply(seq_along(fred.data2$SeriesID), function(x){
+names(fred.test1) <- fred.data1$SeriesID
+save(fred.test1, file = "fred.test1.RData")
 
+# run 2
+fred.test2 <- lapply(seq_along(fred.data2$SeriesID), function(x){
+    
     tryCatch({
         print(x)
         fred.data(myapi,fred.data2$SeriesID[x])
@@ -113,4 +134,5 @@ fred.test <- lapply(seq_along(fred.data2$SeriesID), function(x){
     })
 })
 
-names(fred.test) <- fred.data2$SeriesID
+names(fred.test2) <- fred.data2$SeriesID
+save(fred.test2, file = "fred.test2.RData")
