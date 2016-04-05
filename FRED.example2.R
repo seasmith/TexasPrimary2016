@@ -65,8 +65,8 @@ pcpi.table        <- cat.tabler(pcpi.obs)
 pcpi.table.subset <- pcpi.table[year(pcpi.table$Date) == "2013", -1]
 pcpi.search       <- names(pcpi.table.subset) %>%
                      paste(collapse = "|")
-pcpi.counties     <- fred.series1[grep(pcpi.search, fred.series1$SeriesID), 'County'] %>%
-                     tolower() ## Rename 'County' to 'CountyName' !!!!!!!!!!!!!
+pcpi.counties     <- fred.series1[grep(pcpi.search, fred.series1$SeriesID), 'CountyName'] %>%
+                     tolower()
 pcpi.data         <- cbind(PCPI = as.character(unlist(pcpi.table.subset)), CountyName = pcpi.counties) %>%
                      as.data.frame()
 #!!!!!!!Start here!!!!!!!!~
