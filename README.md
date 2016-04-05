@@ -19,13 +19,17 @@ I have a few functions that will scrape data from FRED (YOU WILL NEED AN API KEY
 I have another R script which will demonstrate how to scrape massive amounts of data from FRED
 
 #####FRED functions
-`fred.series()` = this function will scrape metadata about a particular 'release', including the series within that 'release' as defined by the 'filters'
+`series.scraper()` = this function will scrape metadata about a particular 'release', including the series within that 'release' as defined by the 'filters'
   * Dependencies
     * `county.scraper()` = used to create a searchable column of counties in the master/top-level table
     * `category.scraper()` = used to create a searchable column of categories within each release
-`fred.data()` = this function will scrape the actual data from a given series
+`obs.scraper()` = this function will scrape the actual data from a given series
 
 #####FRED examples
-`FRED.data.example.R` = this script will scrape quite a bit of data from several different releases using two common filters ('tx', 'county')  
+`FRED.example1.R` = this script will scrape quite a bit of data from several different releases using two common filters ('tx', 'county')  
+`FRED.example2.R` = this script will tidy up the `fred.obs1` and `fred.obs2` data. Right now, there are thousands of data frames attached to these two lists - the goal of this example is to condense each `Category` into a table itself.
 
-I recommend SAVING YOUR DATA after you have scraped the data. Hint: I saved mine to R objects using save("somefile.RData").
+#####R Objects
+I have saved much of the data as R objects (.RData) which can be loaded with `load("Data/robject_name.RData")` or whichever filepath you need to use.  
+I am working on creating an object-relationalish database model to store all the data that will eventually be saved as R objects.  
+I highly recommend SAVING YOUR DATA after you have scraped the data. Hint: I saved mine as R objects by using `save(some.object, file = "some.file.RData")`.  
