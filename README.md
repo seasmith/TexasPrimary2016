@@ -23,6 +23,7 @@ I have another R script which will demonstrate how to scrape massive amounts of 
   * Dependencies
     * `county.scraper()` = used to create a searchable column of counties in the master/top-level table
     * `category.scraper()` = used to create a searchable column of categories within each release
+
 `obs.scraper()` = this function will scrape the actual data from a given series
 `cat.functions.R` functions = these functions will be used in `FRED.example2.R` to tidy up those data frames into more manageable data frames. I will clarify their descriptions after my next post.  
 
