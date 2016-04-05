@@ -1,7 +1,9 @@
 library(rvest)
 library(plyr)
-source("fred.series.R")
-source("fred.data.R")
+source("scraper.functions.R")
+# source("fred.series.R")
+# source("fred.data.R")
+
 # Release Examples Info ---------------------------------------------------
 
 
@@ -14,43 +16,45 @@ source("fred.data.R")
 
 # Run the Meta Data Function-----------------------------------------------
  
-        # set first set of variables
+        ## set 1st set of variables
         myapi <- "" # set your API here
         fred.input1 <- c("116", "119", "330", "175")
         filter1     <- c("tx", "county")
         f.data1     <- list()
-        # set second set of variables
-        fred.input2 <- c("346")
-        filter2     <- c("tx", "county", "income")
-        f.data2     <- list()
-
-# run both sets of variables
+        
+## run the 1st set
 fred.series1 <- lapply(seq_along(fred.input1), function(x){
     
     tryCatch({
-        f.data1[[x]] <- fred.series(key    = myapi,
+        f.data1[[x]] <- series.scraper(key    = myapi,
                                     id     = fred.input1[x],
                                     filter = filter1
                                     )
     }, error = function(e){
         Sys.sleep(3.5)
-        f.data1[[x]] <- fred.series(key    = myapi,
+        f.data1[[x]] <- series.scraper(key    = myapi,
                                     id     = fred.input1[x],
                                     filter = filter1
         )
     })
 }) %>% ldply()
 
+    ## set 2nd set of variables
+    fred.input2 <- c("346")
+    filter2     <- c("tx", "county", "income")
+    f.data2     <- list()
+
+## run the 2nd set
 fred.series2 <- lapply(seq_along(fred.input2), function(x){
     
     tryCatch({
-        f.data2[[x]] <- fred.series(key    = myapi,
+        f.data2[[x]] <- series.scraper(key    = myapi,
                                     id     = fred.input2[x],
                                     filter = filter2
                                     )
     }, error = function(e){
         Sys.sleep(3.5)
-        f.data2[[x]] <- fred.series(key    = myapi,
+        f.data2[[x]] <- series.scraper(key    = myapi,
                                     id     = fred.input2[x],
                                     filter = filter2
         )
@@ -60,23 +64,25 @@ fred.series2 <- lapply(seq_along(fred.input2), function(x){
 
 # Clean up the Meta Data --------------------------------------------------
 
-
+    ## get the right county names
     right.counties <- c("Deaf Smith", "El Paso", "Fort Bend",
                         "Jeff Davis", "Jim Hogg", "Jim Wells",
                         "La Salle","Live Oak", "Palo Pinto",
                         "Red River", "San Augustine", "San Jacinto",
                         "San Patricio", "San Saba", "Tom Green",
                         "Val Verde", "Van Zandt")
+
+## 1st series unique 'Category' values
+uis1           <- unique(fred.series1$Category)
     
-    uis1           <- unique(fred.series1$Category)
-    
-fred.series1[fred.series1$Category == uis1[[3]], 'County'] <- right.counties
-fred.series1[fred.series1$Category == uis1[[4]], 'County'] <- right.counties
-fred.series1[fred.series1$Category == uis1[[6]], 'County'] <- right.counties
-fred.series1[fred.series1$Category == uis1[[8]], 'County'] <- right.counties
-fred.series1[fred.series1$Category == uis1[[10]], 'County'] <- right.counties
-fred.series1[fred.series1$Category == uis1[[12]], 'County'] <- right.counties
-fred.series1[fred.series1$Category == uis1[[14]], 'County'] <- right.counties
+# clean up 'CountyName' and 'Category'
+fred.series1[fred.series1$Category == uis1[[3]], 'CountyName'] <- right.counties
+fred.series1[fred.series1$Category == uis1[[4]], 'CountyName'] <- right.counties
+fred.series1[fred.series1$Category == uis1[[6]], 'CountyName'] <- right.counties
+fred.series1[fred.series1$Category == uis1[[8]], 'CountyName'] <- right.counties
+fred.series1[fred.series1$Category == uis1[[10]], 'CountyName'] <- right.counties
+fred.series1[fred.series1$Category == uis1[[12]], 'CountyName'] <- right.counties
+fred.series1[fred.series1$Category == uis1[[14]], 'CountyName'] <- right.counties
 
 fred.series1[fred.series1$Category == uis1[[3]], 'Category'] <- uis1[[1]]
 fred.series1[fred.series1$Category == uis1[[4]], 'Category'] <- uis1[[2]]
@@ -84,67 +90,67 @@ fred.series1[fred.series1$Category == uis1[[6]], 'Category'] <- uis1[[5]]
 fred.series1[fred.series1$Category == uis1[[8]], 'Category'] <- uis1[[7]]
 fred.series1[fred.series1$Category == uis1[[10]], 'Category'] <- uis1[[9]]
 fred.series1[fred.series1$Category == uis1[[12]], 'Category'] <- uis1[[11]]
-# fred.series1[fred.series1$Category == uis1[[14]], 'Category'] <- uis1[[13]]
 
-#     uis2           <- unique(fred.series2$Category)
-#     
-# incorrects     <- grep("in$|for$", uis2)
-# sq             <- seq_along(uis2)
-# corrects       <- sq[!(sq %in% incorrects)]
-# new.fred.series2 <- lapply(incorrects, function(x){
-#     fred.series2[fred.series2$Category == uis2[[x]], 'County'] <- right.counties
-#     fred.series2[fred.series2$Category == uis2[[x]], 'Category'] <- uis2[[1]]
-#     fred.series2
-# })
-fred.series2[fred.series2$Category == uis2[[2]], 'County'] <- right.counties
-fred.series2[fred.series2$Category == uis2[[4]], 'County'] <- right.counties
-fred.series2[fred.series2$Category == uis2[[6]], 'County'] <- right.counties    
+    # save a R object
+    save(fred.series1, file = "fred.series1.RData")
+
+
+## 2nd series unique 'Category' names
+uis2           <- unique(fred.series2$Category)
+
+# clean up 'CountyName' and 'Category'
+fred.series2[fred.series2$Category == uis2[[2]], 'CountyName'] <- right.counties
+fred.series2[fred.series2$Category == uis2[[4]], 'CountyName'] <- right.counties
+fred.series2[fred.series2$Category == uis2[[6]], 'CountyName'] <- right.counties    
 
 fred.series2[fred.series2$Category == uis2[[2]], 'Category'] <- uis2[[1]]
 fred.series2[fred.series2$Category == uis2[[4]], 'Category'] <- uis2[[3]]
 fred.series2[fred.series2$Category == uis2[[6]], 'Category'] <- uis2[[5]]
 
+    # save a R object
+    save(fred.series1, file = "fred.series1.RData")
+
 
 # Run the Data Function ---------------------------------------------------
 
-#run 1
+## 1st series
 fred.obs1 <- lapply(seq_along(fred.series1$SeriesID), function(x){
     
     tryCatch({
         
-        fred.data(myapi,fred.series1$SeriesID[x])
+        obs.scraper(myapi,fred.series1$SeriesID[x])
     }, error = function(e) {
         
         tryCatch({
             Sys.sleep(3.5)
-            fred.data(myapi,fred.series1$SeriesID[x])
+            obs.scraper(myapi,fred.series1$SeriesID[x])
         }, error = function(e) {
             Sys.sleep(3.5)
-            fred.data(myapi,fred.series1$SeriesID[x])
+            obs.scraper(myapi,fred.series1$SeriesID[x])
         })
     })
 })
+    # give it names and save as R object
+    names(fred.obs1) <- fred.series1$SeriesID
+    save(fred.obs1, file = "fred.obs1.RData")
 
-names(fred.obs1) <- fred.series1$SeriesID
-save(fred.obs1, file = "fred.obs1.RData")
-
-# run 2
+## 2nd series
 fred.obs2 <- lapply(seq_along(fred.series2$SeriesID), function(x){
     
     tryCatch({
         
-        fred.data(myapi,fred.series2$SeriesID[x])
+        obs.scraper(myapi,fred.series2$SeriesID[x])
     }, error = function(e) {
         
         tryCatch({
             Sys.sleep(3.5)
-            fred.data(myapi,fred.series2$SeriesID[x])
+            obs.scraper(myapi,fred.series2$SeriesID[x])
         }, error = function(e) {
             Sys.sleep(3.5)
-            fred.data(myapi,fred.series2$SeriesID[x])
+            obs.scraper(myapi,fred.series2$SeriesID[x])
         })
     })
 })
-
-names(fred.obs2) <- fred.series2$SeriesID
-save(fred.obs2, file = "fred.obs2.RData")
+    # git is names and save as R object
+    names(fred.obs2) <- fred.series2$SeriesID
+    save(fred.obs2, file = "fred.obs2.RData")
