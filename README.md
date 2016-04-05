@@ -19,13 +19,13 @@ I have a few functions that will scrape data from FRED (YOU WILL NEED AN API KEY
 I have another R script which will demonstrate how to scrape massive amounts of data from FRED
 
 #####FRED functions
-`series.scraper()` = this function will scrape metadata about a particular 'release', including the series within that 'release' as defined by the 'filters'
+* `series.scraper()` = this function will scrape metadata about a particular 'release', including the series within that 'release' as defined by the 'filters'
   * Dependencies
     * `county.scraper()` = used to create a searchable column of counties in the master/top-level table
     * `category.scraper()` = used to create a searchable column of categories within each release
 
-`obs.scraper()` = this function will scrape the actual data from a given series  
-`cat.functions.R` functions = these functions will be used in `FRED.example2.R` to tidy up those data frames into more manageable data frames. I will clarify their descriptions after my next post.  
+* `obs.scraper()` = this function will scrape the actual data from a given series  
+* `cat.functions.R` functions = these functions will be used in `FRED.example2.R` to tidy up those data frames into more manageable data frames. I will clarify their descriptions after my next post.  
 
 #####FRED examples
 `FRED.example1.R` = this script will scrape quite a bit of data from several different releases using two common filters ('tx', 'county')  
