@@ -2,11 +2,12 @@
 
 
 # This function is required to achieve the results in 'FRED.example2.R'
+# This functions will
 
 obs.catcher <- function(series.table, obs.list, cat){
     cat.series               <- series.table[series.table[, 'Category'] == cat, ]
-    cat.series[, 'County']   <- tolower(cat.series[, 'County'])
-    colnames(cat.series)[11] <- "CountyName"
+    cat.series[, 'CountyName']   <- tolower(cat.series[, 'CountyName'])
+    # colnames(cat.series)[11] <- "CountyName"
     
     # Find all SeriesID matching the above filtered data's SeriesID
     cat.obs <- list()
@@ -40,6 +41,8 @@ cat.info <- function(series.table){
 
 # cat.tabler(obs.list) ----------------------------------------------------
 
+
+# This function will place the observations into a table
 
 cat.tabler <- function(obs.list){
     x <- 1
