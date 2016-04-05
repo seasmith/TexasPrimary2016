@@ -47,19 +47,19 @@ series.scraper <- function(key = NULL, id = NULL, filters = NULL){
     blessed_start      <- series %>% html_attr("realtime_start")            %>% as.Date()
     blessed_end        <- series %>% html_attr("realtime_end")              %>% as.Date()
     release            <- rep(id, length(series))                           %>% as.numeric()
-    data.info          <- data.frame("Release" = release,
-                                     "SeriesID" = series_id,
-                                     "Title" = title,
-                                     "Frequency" = frequency,
-                                     "Units" = units,
-                                     "Start" = start,
-                                     "End" = end,
-                                     "Adjustment" = adjustment,
+    data.info          <- data.frame("Release"     = release,
+                                     "SeriesID"    = series_id,
+                                     "Title"       = title,
+                                     "Frequency"   = frequency,
+                                     "Units"       = units,
+                                     "Start"       = start,
+                                     "End"         = end,
+                                     "Adjustment"  = adjustment,
                                      "LastUpdated" = last_updated,
-                                     "Blessed" = blessed_start
+                                     "Blessed"     = blessed_start
     )
-    data.info$CountyName   <- county.scraper(title)
-    data.info$Category <- category.scraper(title)
+    data.info$CountyName <- county.scraper(title)
+    data.info$Category   <- category.scraper(title)
     data.info
 }
 
@@ -71,7 +71,14 @@ series.scraper <- function(key = NULL, id = NULL, filters = NULL){
 # You MUST specify a 'series' (alphanumeric sequence corresponding to a data table within a release)
 # A data frame will be returned with the actual data (a column of dates and a column of 'series' values)
 
-obs.scraper <- function(key, series){
+obs.scraper <- function(key = NULL, series = NULL){
+    
+    if(is.null(key)){
+        stop("An API 'key' is required!")
+    }
+    if(is.null(series)){
+        stop("You must input a character vector corresponding to a series' 'id'")
+    }
     
     root        <- "https://api.stlouisfed.org/fred/series/observations?series_id="
     cred        <- "&api_key="

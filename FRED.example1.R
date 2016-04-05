@@ -1,8 +1,6 @@
 library(rvest)
 library(plyr)
 source("scraper.functions.R")
-# source("fred.series.R")
-# source("fred.data.R")
 
 # Release Examples Info ---------------------------------------------------
 
