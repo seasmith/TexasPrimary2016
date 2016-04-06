@@ -48,9 +48,9 @@ cat.tabler <- function(obs.list){
     x <- 1
     while(x <= length(obs.list)){
         if(x == 1){
-            main.frame           <- data.frame()
-            main.frame           <- obs.list[[x]]
-            names(main.frame)[2] <- names(obs.list)[1]
+            main.frame           <- data.frame() # initialize the data frame
+            main.frame           <- obs.list[[x]] # add the first list object
+            names(main.frame)[2] <- names(obs.list)[1] # give that object a name
             main.frame
         }   else {
             main.frame               <- merge(main.frame, obs.list[[x]], by = "Date")
@@ -62,11 +62,6 @@ cat.tabler <- function(obs.list){
     }
     main.frame
 }
-
-# # tranpose, create row names column, change column headers, and assign data types 
-# main.frame2           <- t(main.frame)
-# colnames(main.frame2) <- main.frame2[1, ]
-# main.frame2           <- main.frame2[-1, ]
 
 
 # Other -------------------------------------------------------------------
