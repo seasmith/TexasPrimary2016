@@ -13,8 +13,8 @@ data("county.regions")
 
 # Load Geo Data -----------------------------------------------------------
 
-tx.regions                <- filter(county.regions, state.name == "texas") %>%
-                             select(region, "CountyName" = county.name)
+tx.regions <- filter(county.regions, state.name == "texas") %>%
+              select(region, "CountyName" = county.name)
 
 
 # Estimated Household Income ----------------------------------------------
@@ -37,7 +37,7 @@ emhi.obs  <- lapply(seq_along(emhi.obs), function(x){
 
                  to.get    <- dim(emhi.obs[[x]])[1]
                  loop.df   <- data.frame(SeriesID = names(emhi.obs[x]),
-                                         EMHI    = emhi.obs[[x]][to.get, 2])
+                                         EMHI     = emhi.obs[[x]][to.get, 2])
                  loop.list[[x]] <- loop.df
 }) %>% ldply
 
