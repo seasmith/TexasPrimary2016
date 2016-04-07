@@ -5,6 +5,10 @@ You will need to run the `TexasPrimary2016.R` script to run the examples in `exa
 
 ###Getting the Election Data
 
+#####Where data?
+* [Texas SOS Election Results](http://www.sos.state.tx.us/elections/historical/)
+* [Texas SOS ELECTION HISTORY](http://elections.sos.state.tx.us/index.htm)
+
 #####Data scraping files
 * `TexasPrimary2016.R` = will scrape data from the Texas secretary of state's election data website
 
