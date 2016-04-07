@@ -109,5 +109,5 @@ tx.regions <- filter(county.regions, state.name == "texas") %>%
 # extension = ".txt"
 # separator = "," separator
     lapply(seq_along(fred.tables), function(x){
-        write.table(fred.tables[[x]], file = paste("Data/", names(fred.tables[x]), ".txt", sep = ""), sep = ",", row.names = F)
+        write.table(fred.tables[[x]], file = paste("Data/TableFiles/", names(fred.tables[x]), ".txt", sep = ""), sep = ",", row.names = F)
     })
