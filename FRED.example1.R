@@ -1,6 +1,13 @@
+
+# Load Dependencies -------------------------------------------------------
+
+
 library(rvest)
 library(plyr)
+library(dplyr)
 source("scraper.functions.R")
+myapi <- "" # set your API here
+
 
 # Release Examples Info ---------------------------------------------------
 
@@ -15,7 +22,7 @@ source("scraper.functions.R")
 # Run the Meta Data Function-----------------------------------------------
  
     ## set 1st set of variables
-        myapi <- "" # set your API here
+        
         fred.input1 <- c("116", "119", "330", "175")
         filter1     <- c("tx", "county")
         f.data1     <- list()
@@ -35,8 +42,8 @@ source("scraper.functions.R")
         })
     }) %>% ldply()
 
-# save it
-    save(fred.series1, file = "fred.series1.RData")
+# # save it
+#     save(fred.series1, file = "fred.series1.RData")
 
     ## set 2nd set of variables
         fred.input2 <- c("346")
@@ -47,21 +54,25 @@ source("scraper.functions.R")
     fred.series2 <- lapply(seq_along(fred.input2), function(x){
         
         tryCatch({
-            f.data2[[x]] <- series.scraper(key    = myapi,
+            f.data2[[x]] <- series.scraper(key = myapi,
                                         id     = fred.input2[x],
-                                        filter = filter2
-                                        )
+                                        filter = filter2)
         }, error = function(e){
             Sys.sleep(3.5)
-            f.data2[[x]] <- series.scraper(key    = myapi,
+            f.data2[[x]] <- series.scraper(key = myapi,
                                         id     = fred.input2[x],
-                                        filter = filter2
-            )
+                                        filter = filter2)
         })
     }) %>% ldply()
 
-# save it
-    save(fred.series2, file = "fred.series2.RData")
+# # save it
+#     save(fred.series2, file = "fred.series2.RData")
+
+## combine the two data frames and save
+    fred.series <- rbind(fred.series1, fred.series2) %>%
+                   arrange(Release, Category, CountyName)
+    save(fred.series, file = "Data/fred.series.RData")
+
 
 # Clean up the Meta Data --------------------------------------------------
 
@@ -131,9 +142,9 @@ source("scraper.functions.R")
             })
         })
     })
-# give it names and save as R object
-    names(fred.obs1) <- fred.series1$SeriesID
-    save(fred.obs1, file = "fred.obs1.RData")
+# # give names and save as R object
+#     names(fred.obs1) <- fred.series1$SeriesID
+#     save(fred.obs1, file = "fred.obs1.RData")
 
 ## 2nd series
     fred.obs2 <- lapply(seq_along(fred.series2$SeriesID), function(x){
@@ -152,6 +163,10 @@ source("scraper.functions.R")
             })
         })
     })
-# git is names and save as R object
-    names(fred.obs2) <- fred.series2$SeriesID
-    save(fred.obs2, file = "fred.obs2.RData")
+# # give names and save as R object
+#     names(fred.obs2) <- fred.series2$SeriesID
+#     save(fred.obs2, file = "fred.obs2.RData")
+
+## concatenate fred.obs[x] and save as one R object
+    fred.obs <- c(fred.obs1, fred.obs2)
+    save(fred.obs, file = "Data/fred.obs.RData")

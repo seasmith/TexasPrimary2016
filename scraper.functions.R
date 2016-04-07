@@ -48,8 +48,8 @@ series.scraper <- function(key = NULL, id = NULL, filters = NULL){
     blessed_start      <- series %>% html_attr("realtime_start")            %>% as.Date()
     blessed_end        <- series %>% html_attr("realtime_end")              %>% as.Date()
     release            <- rep(id, length(series))                           %>% as.numeric()
-    data.info          <- data.frame("Release"     = release,
-                                     "SeriesID"    = series_id,
+    data.info          <- data.frame("SeriesID"    = series_id,
+                                     "Release"     = release,
                                      "Title"       = title,
                                      "Frequency"   = frequency,
                                      "Units"       = units,
@@ -62,7 +62,7 @@ series.scraper <- function(key = NULL, id = NULL, filters = NULL){
     cat.county           <- cat.county.scraper(title)
     data.info$CountyName <- sapply(seq_along(cat.county), function(y) cat.county[[y]][2] %>% tolower())
     data.info$Category   <- sapply(seq_along(cat.county), function(y) cat.county[[y]][1])
-    data.info            <- data.info %>% select(c(2,1,12,11,3:10)) %>% arrange(Release, Category, CountyName)
+    data.info            <- data.info %>% select(c(1:2, 12, 11, 3:10)) %>% arrange(Release, Category, CountyName)
 }
 
 
