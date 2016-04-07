@@ -8,8 +8,10 @@
 # A data frame will be returned which can act as a master/top-level table
 
 series.scraper <- function(key = NULL, id = NULL, filters = NULL){
-    
-        # check if 'key' and 'id' inputs have been given
+        
+        # load dependencies and check arguments
+            require(dplyr, quietly = T)
+            require(rvest, quietly = T)
             if(is.null(key)){
                 stop("An API 'key' is required!")
             }
@@ -60,7 +62,7 @@ series.scraper <- function(key = NULL, id = NULL, filters = NULL){
     cat.county           <- cat.county.scraper(title)
     data.info$CountyName <- sapply(seq_along(cat.county), function(y) cat.county[[y]][2] %>% tolower())
     data.info$Category   <- sapply(seq_along(cat.county), function(y) cat.county[[y]][1])
-    data.info
+    data.info            <- data.info %>% select(c(2,1,12,11,3:10)) %>% arrange(Release, Category, CountyName)
 }
 
 
@@ -74,7 +76,8 @@ series.scraper <- function(key = NULL, id = NULL, filters = NULL){
 
 obs.scraper <- function(key = NULL, series = NULL){
     
-    # check if 'key' and 'series' have been given
+    # load dependencies and check arguments
+        require(rvest, quietly = T)
         if(is.null(key)){
             stop("An API 'key' is required!")
         }
@@ -192,3 +195,4 @@ cat.county <-lapply(seq_along(title.vector), function(x){
 #     fred.series2[fred.series2$Category == uis2[[x]], 'Category'] <- uis2[[1]]
 #     fred.series2
 # })
+
