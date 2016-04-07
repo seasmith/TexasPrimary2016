@@ -34,7 +34,12 @@ I have another R script which will demonstrate how to scrape massive amounts of 
 `FRED.example1.R` = this script will scrape quite a bit of data from several different releases using two common filters ('tx', 'county')  
 `FRED.example2.R` = this script will tidy up the `fred.obs1` and `fred.obs2` data. Right now, there are thousands of data frames attached to these two lists - the goal of this example is to condense each `Category` into a table itself.
 
-###R Objects
+###Other
+
+#####R Objects
 * I have saved much of the data as R objects (.RData) which can be loaded with `load("Data/robject_name_here.RData")`.  
 * I am working on creating an object-relationalish database model to store all the data that will eventually be saved as R objects.  
 * I highly recommend SAVING YOUR DATA after you have scraped the data. Hint: I saved mine as R objects by using `save(some.object, file = "some.file.RData")`.  
+
+#####Campaign Finance Data
+* [FEC ftp server](ftp://ftp.fec.gov/FEC/)
