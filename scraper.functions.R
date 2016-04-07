@@ -100,40 +100,6 @@ obs.scraper <- function(key = NULL, series = NULL){
 }
 
 
-# county.scraper(string) --------------------------------------------------
-
-
-# county.scraper <- function(string){
-#     
-#     spaces.vector    <- gregexpr("\\s", string)
-#     spaceless.vector <- sapply(seq_along(spaces.vector), function(x){
-#         
-#         target.space1 <- length(spaces.vector[[x]]) - 2
-#         target.space2 <- length(spaces.vector[[x]]) - 1
-#         target.pos1   <- spaces.vector[[x]][target.space1] + 1
-#         target.pos2   <- spaces.vector[[x]][target.space2] - 1
-#         substr(string[[x]], target.pos1, target.pos2)
-#     })
-#     spaceless.vector
-# }
-
-
-# category.scraper(string) ------------------------------------------------
-
-
-# category.scraper <- function(string){
-#     
-#     spaces.vector    <- gregexpr("\\s", string)
-#     spaceless.vector <- sapply(seq_along(spaces.vector), function(x){
-#         
-#         target.space1 <- length(spaces.vector[[x]]) - 3
-#         target.pos1   <- spaces.vector[[x]][target.space1] - 1
-#         substr(string[[x]], 1, target.pos1)
-#     })
-#     spaceless.vector
-# }
-
-
 # cat.county.scraper(title.vector) ----------------------------------------
 
 
@@ -178,21 +144,6 @@ cat.county <-lapply(seq_along(title.vector), function(x){
             })
 ###--- END lapply() FUN
 
-# return the list
+## return the list
     cat.county
 }
-
-
-# Unrealized --------------------------------------------------------------
-
-
-#     
-# incorrects     <- grep("in$|for$", uis2)
-# sq             <- seq_along(uis2)
-# corrects       <- sq[!(sq %in% incorrects)]
-# new.fred.series2 <- lapply(incorrects, function(x){
-#     fred.series2[fred.series2$Category == uis2[[x]], 'CountyName'] <- right.counties
-#     fred.series2[fred.series2$Category == uis2[[x]], 'Category'] <- uis2[[1]]
-#     fred.series2
-# })
-

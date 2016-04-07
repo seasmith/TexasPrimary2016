@@ -23,35 +23,6 @@ tx.regions <- filter(county.regions, state.name == "texas") %>%
               select(region, "CountyName" = county.name)
 
 
-# Estimated Household Income ----------------------------------------------
-
-
-# emhi.obs <- obs.catcher(fred.series2, fred.obs2, "Estimate of Median Household Income")
-# 
-# # Find 2014 values (last row)
-# loop.list <- list()
-# emhi.obs  <- lapply(seq_along(emhi.obs), function(x){
-# 
-#                  to.get    <- dim(emhi.obs[[x]])[1]
-#                  loop.df   <- data.frame(SeriesID = names(emhi.obs[x]),
-#                                          EMHI     = emhi.obs[[x]][to.get, 2])
-#                  loop.list[[x]] <- loop.df
-# }) %>% ldply
-# 
-# # now create the data frame with 'region' identifier
-# emhi.obs$CountyName <- emhi.series[emhi.obs$SeriesID == emhi.obs$SeriesID, 'CountyName']
-# emhi.obs            <- left_join(emhi.obs, tx.regions, "CountyName")
-# emhi.obs$EMHI       <- as.numeric(as.character(emhi.obs$EMHI))
-# 
-# 
-# emhi.obs <- within(emhi.obs, value <- as.factor(cut(EMHI, quantile(EMHI), include.lowest = T, labels = F)))
-# 
-# choro_emhi     <- county_choropleth(emhi.obs, state_zoom = "texas", legend = "Rank: Lowest to Highest", num_colors = 4) +
-#     ggtitle("Estimated Median Household Income\n 2014") +
-#     coord_map()
-# choro_emhi
-
-
 # Per Capita Personal Income ----------------------------------------------
 
 
