@@ -1,17 +1,12 @@
 
 # Load Dependencies -------------------------------------------------------
 
-
-library(ggplot2, quietly = T)
-library(dplyr, quietly = T)
 library(plyr, quietly = T)
+library(dplyr, quietly = T)
 library(rvest, quietly = T)
-library(choroplethr, quietly = T)
 library(choroplethrMaps, quietly = T)
-library(gridExtra, quietly = T)
 library(lubridate, quietly = T)
 source("cat.functions.R")
-load("Data/fred.master")
 load("Data/fred.series")
 load("Data/fred.obs")
 data("county.regions")
@@ -23,32 +18,9 @@ tx.regions <- filter(county.regions, state.name == "texas") %>%
               select(region, "CountyName" = county.name)
 
 
-# Per Capita Personal Income ----------------------------------------------
+# Create Master Table -----------------------------------------------------
 
-
-# # Get observations for "Per Capita Personal Income" into a table with county names
-# pcpi.obs          <- obs.catcher(fred.series1, fred.obs1, "Per Capita Personal Income")
-# pcpi.table        <- cat.tabler(pcpi.obs)
-# pcpi.table.subset <- pcpi.table[year(pcpi.table$Date) == "2013", -1]
-# pcpi.search       <- names(pcpi.table.subset) %>%
-#                      paste(collapse = "|")
-# pcpi.counties     <- fred.series1[grep(pcpi.search, fred.series1$SeriesID), 'CountyName'] %>%
-#                      tolower()
-# pcpi.data         <- cbind(PCPI = as.character(unlist(pcpi.table.subset)), CountyName = pcpi.counties) %>%
-#                      as.data.frame()
-# #!!!!!!!Start here!!!!!!!!~
-# # Insert 'region'
-# pcpi.data      <- left_join(pcpi.data, tx.regions, "CountyName")
-# pcpi.data$PCPI <- as.numeric(as.character(pcpi.data$PCPI))
-# 
-# # Rank the values
-# pcpi.data <- within(pcpi.data, value <- as.factor(cut(PCPI, quantile(PCPI), include.lowest = T, labels = F)))
-# 
-# # Plot it out
-# choro_pcpi     <- county_choropleth(pcpi.obs, state_zoom = "texas", legend = "Rank: Lowest to Highest", num_colors = 4) +
-#                   ggtitle("Per Capita Personal Income\n 2013") +
-#                   coord_map()
-# choro_pcpi
+fred.master <- cat.info(fred.series)
 
 
 # All in one --------------------------------------------------------------
@@ -62,19 +34,24 @@ tx.regions <- filter(county.regions, state.name == "texas") %>%
 # This function groups data frames by 'category'
 # It returns a list of 10 elements (corresponding to the 10 'category' values)
 # Each element has 254 data frames (one for each county)
-    big.obs <- lapply(seq_along(fred.master$category), function(x){
+    fred.cat.list <- lapply(seq_along(fred.master$category), function(x){
         obs.catcher(series.table = fred.series,
                     obs.list     = fred.obs,
                     cat          = fred.master$category[x])
     })
+names(fred.cat.list) <- fred.master$category
+save(fred.cat.list, file = "Data/fred.cat.list.RData")
 
 # This function merges the data frames in each list element
 # The result is a massive data frame in each of the 10 list elements
 # The data frames are 255 columns wide
 # Columns are 'Date' and the 254 'SeriesID' corresponding to each of the 254 counties
-    fred.tables <- lapply(seq_along(big.obs), function(x){
-        cat.tabler(big.obs[[x]])
+    fred.tables <- lapply(seq_along(fred.cat.list), function(x){
+        cat.tabler(fred.cat.list[[x]])
     })
+names(fred.tables) <- fred.master$category
+# fred.tables   <- fred.tables %>% select(-1) %>% as.character() %>% as.numeric()
+save(fred.tables, file = "Data/fred.tables.RData")
 
 # write all 10 data frames to a file
 # extension = ".txt"
