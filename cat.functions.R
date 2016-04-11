@@ -1,3 +1,15 @@
+
+# cat.info() --------------------------------------------------------------
+
+cat.info <- function(series.table){
+
+### one swift succession of code
+    summarized.series <- fred.series %>% select(2,3,6,7,8,9) %>%
+                         aggregate(list(series.table$Category), unique) %>% select(3,2,4:7) %>%
+                         arrange(Release, Category)
+}
+
+
 # obs.catcher(series.table, obs.list, cat) --------------------------------
 
 
@@ -8,40 +20,15 @@
     # obs.list     = use fred.obs
     # cat          = character string corresponding to a category
 # Use the result of this function as the argument for cat.tabler()
-# cat.tabler() will create a table from all the data frames
 
 obs.catcher <- function(series.table, obs.list, cat){
-    cat.series               <- series.table[series.table$Category == cat, ]
-    cat.series$CountyName   <- tolower(cat.series$CountyName)
     
-    # Find all SeriesID matching the above filtered data's SeriesID
+### subset by category
+    cat.series               <- series.table[series.table$Category == cat, ]
+    
+### Find all SeriesID matching the subset's SeriesID
     cat.obs <- list()
     cat.obs <- obs.list[cat.series$SeriesID]
-}
-
-
-# cat.info(series.table) --------------------------------------------------
-
-
-# This function will create a 'master/top-level' table
-# Specifically it examines the 'Frequency', 'Start', 'End', and 'Units' of each 'Category'.
-cat.info <- function(series.table){
-    require(plyr, quietly = T)
-    require(dplyr, quietly = T)
-    cat      <- unique(series.table$Category)
-    infos    <- list()
-    big.list <- lapply(seq_along(cat), function(x){
-            release <- unique( series.table$Release[   series.table$Category == cat[[x]]])
-            freq    <- unique( series.table$Frequency[ series.table$Category == cat[[x]]])
-            start   <- unique( series.table$Start[     series.table$Category == cat[[x]]])
-            end     <- unique( series.table$End[       series.table$Category == cat[[x]]])
-            units   <- unique( series.table$Units[     series.table$Category == cat[[x]]])
-            infos[[x]] <- data.frame(release, freq, start, end, units)
-    })
-    names(big.list) <- cat
-    df              <- big.list %>% ldply()
-    names(df)[1]    <- "category"
-    df
 }
 
 
