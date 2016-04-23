@@ -8,6 +8,7 @@ You will need to run the `TexasPrimary2016.R` script to run the examples in `exa
 #####Where data?
 * [Texas SOS Election Results](http://www.sos.state.tx.us/elections/historical/)
 * [Texas SOS ELECTION HISTORY](http://elections.sos.state.tx.us/index.htm)
+* [Open Data Stackexchange: Where to find Texas election data](http://opendata.stackexchange.com/questions/6583/where-can-i-find-data-on-the-winner-of-the-presidential-popular-vote-by-u-s-cou/6587)
 
 #####Data scraping files
 * `TexasPrimary2016.R` = will scrape county-level election results from the Texas secretary of state's website
