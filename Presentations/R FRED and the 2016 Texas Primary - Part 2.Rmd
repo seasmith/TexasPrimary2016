@@ -1,7 +1,7 @@
 ---
 title: 'R, FRED, and the 2016 Texas Primary: Part 2'
 author: "Luke Smith"
-date: "April 24, 2016"
+date: "April 26, 2016"
 output: 
   pdf_document: 
     latex_engine: xelatex
@@ -18,11 +18,11 @@ I have all the metadata and the data itself. However, all that data is floating 
 
 ## Introduction to `cat.functions.R`   
 
-The file `cat.functions.R` contains a few functions that will help us tidy up this data:
+The file `cat.functions.R` contains a functions that we will use to tidy up the FRED data:
 
 * `cat.info()` = creates a master/top-level table
-* `obs.catcher()` = uses 'category' information from cat.info() to group data frames in fred.obs by 'category'
-* `cat.tabler()` = creates tables each 'category' list element returned by obs.catcher()
+* `obs.catcher()` = uses 'category' information from `cat.info()` to group data frames in `fred.obs` by 'category'
+* `cat.tabler()` = creates tables each 'category' list element returned by `obs.catcher()`
 
 ---
 
@@ -31,7 +31,7 @@ The file `cat.functions.R` contains a few functions that will help us tidy up th
 1. The first function, `cat.info()`, will create a handy table with information about each category
 2. We can use this table to check the frequency and range of each category
 3. The second function, `obs.catcher()`, will categorize the data in `fred.obs`
-4. The last function in the list, `cat.tabler()`,
+4. The last function in the list, `cat.tabler()`, will create a table for each category (I initially thought this would be useful but since have reconsidered, but I am including it anyway)
 
 ---
 
@@ -182,5 +182,5 @@ tail(fred.cat.list$`Resident Population`$TXHARR1POP)
 
 ```{r}
 # `cat.tabler()`
-head(fred.tables[[1]][1:5])
+head(fred.tables$`Civilian Labor Force`[1:5])
 ```
