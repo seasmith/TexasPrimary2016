@@ -1,3 +1,6 @@
+# Load Dependencies -------------------------------------------------------
+
+
 library(ggplot2)
 library(dplyr)
 library(rvest)
@@ -41,27 +44,6 @@ tex.rep <- mutate(tex.rep,
 tex.rep[,19:22] <- round(tex.rep[,19:22], digits = 1)
 
 
-# Individual Republican Data Table ----------------------------------------
-
-
-#John Kasich
-jk.counties <- filter(tx.r.results, Kasich > Cruz & Kasich > Trump & Kasich > Rubio)
-kable(jk.counties, caption = "Counties won by Kasich")
-
-#Marco Rubio
-mr.counties <- filter(tx.r.results, Rubio > Cruz & Rubio > Trump & Rubio > Kasich)
-kable(mr.counties, caption = "Counties won by Rubio")
-
-#Donald Trump
-dt.counties <- filter(tx.r.results, Trump > Cruz & Trump > Rubio & Trump > Kasich) %>%
-    select(1,19:22)
-kable(dt.counties, caption = "Counties won by Trump")
-
-#Ted Cruz
-tc.counties <- filter(tx.r.results, Cruz > Trump & Cruz > Rubio & Cruz > Kasich)
-kable(tc.counties, caption = "Counties won by Cruz")
-
-
 # Democratic Data Table ---------------------------------------------------
 
 
@@ -92,6 +74,37 @@ tex.dem <- mutate(tex.dem,
                   mo = (OMalley/TotalVotes)*100
 )
 tex.dem[,13:15] <- round(tex.dem[,13:15], digits = 1)
+
+
+# Download Data - Geo -----------------------------------------------------
+
+
+data("county.regions")
+tx.regions   <- filter(county.regions, state.name == "texas") %>%
+    select(region, "CountyName" = county.name)
+tx.r.results <- left_join(tex.rep, tx.regions, "CountyName")
+tx.d.results <- left_join(tex.dem, tx.regions, "CountyName")
+
+
+# Individual Republican Data Table ----------------------------------------
+
+
+#John Kasich
+jk.counties <- filter(tx.r.results, Kasich > Cruz & Kasich > Trump & Kasich > Rubio)
+kable(jk.counties, caption = "Counties won by Kasich")
+
+#Marco Rubio
+mr.counties <- filter(tx.r.results, Rubio > Cruz & Rubio > Trump & Rubio > Kasich)
+kable(mr.counties, caption = "Counties won by Rubio")
+
+#Donald Trump
+dt.counties <- filter(tx.r.results, Trump > Cruz & Trump > Rubio & Trump > Kasich) %>%
+    select(1,19:22)
+kable(dt.counties, caption = "Counties won by Trump")
+
+#Ted Cruz
+tc.counties <- filter(tx.r.results, Cruz > Trump & Cruz > Rubio & Cruz > Kasich)
+kable(tc.counties, caption = "Counties won by Cruz")
 
 
 # Individual Democrat Data Table ------------------------------------------
@@ -129,11 +142,10 @@ tex.turnout       <- tex.results
 tex.turnout$value <- tex.turnout$TotalTurnOut
 
 
-# Download Data - Geo -----------------------------------------------------
 
+# Save Results ------------------------------------------------------------
 
-data("county.regions")
-tx.regions   <- filter(county.regions, state.name == "texas") %>%
-                select(region, "CountyName" = county.name)
-tx.r.results <- left_join(tex.rep, tx.regions, "CountyName")
-tx.d.results <- left_join(tex.dem, tx.regions, "CountyName")
+save(tex.rep, file = "Data/Election/tex.rep.RData")
+save(tex.dem, file = "Data/Election/tex.dem.RData")
+save(tex.turnout, file = "Data/Election/tex.turnout.RData")
+save(tex.results, file = "Data/Election/tex.results.RData")
