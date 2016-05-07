@@ -3,27 +3,35 @@
 This repo is dedicated toward examining the data from the 2016 Texas Presidential Primary. Most of the code in `TexasPrimary2016.R` comes from [this post on R-Bloggers](http://www.r-bloggers.com/mapping-election-results-with-r-and-choroplethr/) (by way of [R. Duncan McIntosh](http://rduncanmcintosh.com/) and his [post on Ari Lamstein's blog](http://www.arilamstein.com/blog/2016/03/21/mapping-election-results-r-choroplethr/))  
 You will need to run the `TexasPrimary2016.R` script to run the examples in `examples.R`.
 
-###Getting the Election Data
+___
 
-#####Where data?
-* [Texas SOS Election Results](http://www.sos.state.tx.us/elections/historical/)
-* [Texas SOS ELECTION HISTORY](http://elections.sos.state.tx.us/index.htm)
-* [Open Data Stackexchange: Where to find Texas election data](http://opendata.stackexchange.com/questions/6583/where-can-i-find-data-on-the-winner-of-the-presidential-popular-vote-by-u-s-cou/6587)
+### Election Data
 
-#####Data scraping files
-* `TexasPrimary2016.R` = will scrape county-level election results from the Texas secretary of state's website
+* **Where are the data sources?**  
+    [Texas SOS Election Results](http://www.sos.state.tx.us/elections/historical/)  
+    [Texas SOS ELECTION HISTORY](http://elections.sos.state.tx.us/index.htm)  
+    [Open Data Stackexchange: Where to find Texas election data](http://opendata.stackexchange.com/questions/6583/where-can-i-find-data-on-the-winner-of-the-presidential-popular-vote-by-u-s-cou/6587)  
 
-#####Data exploration files
-* `examples.R` = will create maps and knitr tables
-  * Script dependencies
-    * `TexasPrimary2016.R`
+* **Data scraping files** | `"~/R/TexasPrimary2016/Functions/..."`  
+    `scraper.functions.R` = functions to scrape raw data from the web
+    `cat.functions.R` = functions to group similar data together
+    `agg.functions.R` = functions to aggregate FRED data
+    
 
-###Getting the Economic Data
-I am in the early stages  of adding some county-level economic data from FRED (Federal Reserve's Economic Data).  
-I have a few functions that will scrape data from FRED (YOU WILL NEED AN API KEY FROM FRED).  
-I have another R script which will demonstrate how to scrape massive amounts of data from FRED.
+* **Data exploration files** | `"~/R/TexasPrimary2016/Examples/..."`  
+    `TexasPrimary2016.R` = scrapes county-level election results from the Texas secretary of state's website  
+    `examples.R` = creates maps and knitr tables with data from `TexasPrimary2016.R`   
+    `FRED.example1.R` = scrapes Texas county level data from FRED  
+    `FRED.example2.R` = tidies up the data from `FRED.example1.R`
+    `FRED.example3.R` = aggregates the FRED data for some exploratory analysis
 
-#####FRED functions
+* **Where are the data itself?** | `"~/R/TexasPrimary/Data/..."`  
+    `"~/R/TexasPrimary/Data/Election"` = all election data I have scraped is stored in this folder  
+    `"~/R/TexasPrimary/Data/FRED"` = all FRED (economic and demographic) data I have scraped is stored in this folder
+
+___
+
+### FRED functions
 * `series.scraper()` = this function will scrape metadata about a particular 'release', including the series within that 'release' as defined by the 'filters'
   * Script dependencies
     * `cat.county.scraper()` = uses regular expressions to extract category and county information (replaces earlier functions)
@@ -31,16 +39,7 @@ I have another R script which will demonstrate how to scrape massive amounts of 
 * `obs.scraper()` = this function will scrape the actual data from a given series  
 * `cat.functions.R` = functions in this script will be used in `FRED.example2.R` to tidy up those data frames into more manageable data frames. I will clarify their descriptions after my next post.  
 
-#####FRED scraping examples
-`FRED.example1.R` = this script will scrape quite a bit of data from several different releases using two common filters ('tx', 'county')  
-`FRED.example2.R` = this script will tidy up the `fred.obs1` and `fred.obs2` data. Right now, there are thousands of data frames attached to these two lists - the goal of this example is to condense each `Category` into a table itself.
+___
 
-###Other
-
-#####R Objects
-* I have saved much of the data as R objects (.RData) which can be loaded with `load("Data/robject_name_here.RData")`.  
-* I am working on creating an object-relationalish database model to store all the data that will eventually be saved as R objects.  
-* I highly recommend SAVING YOUR DATA after you have scraped the data. Hint: I saved mine as R objects by using `save(some.object, file = "some.file.RData")`.  
-
-#####Campaign Finance Data
-* [FEC ftp server](ftp://ftp.fec.gov/FEC/)
+### Other data yet to come
+* `[FEC ftp server](ftp://ftp.fec.gov/FEC/)` = Federal Election Commission data (campaign finance)
