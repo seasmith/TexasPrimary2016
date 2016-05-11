@@ -4,8 +4,8 @@ library(plyr)
 library(dplyr)
 library(lubridate)
 library(ggplot2)
-source("~/R/Functions/TexasPrimary2016.agg.functions.R")
-load("~/R/TexasPrimary2016/Data/fred.cat.list.RData")
+source("~/R/TexasPrimary2016/Functions/agg.functions.R")
+load("~/R/TexasPrimary2016/Data/FRED/fred.cat.list.RData")
 load("~/R/TexasPrimary2016/Data/Election/tex.results.RData")
 
 
@@ -28,9 +28,11 @@ load("~/R/TexasPrimary2016/Data/Election/tex.results.RData")
 # Merge Data --------------------------------------------------------------
 
     
-agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>% 
+agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
+            rename(UnRate = Value.x, PCPI = Value.y) %>%
             merge(clf.2013, by = "CountyName") %>%
-            merge(rp.2013, by = "CountyName")
+            merge(rp.2013, by = "CountyName") %>%
+            rename(CLF = Value.x, RP = Value.y)
 
 
 # Add Election Turnout Winner (Party) -------------------------------------
@@ -60,41 +62,81 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
     agg.2013$RepWinner <- RepWinner
 
 
+# Looking at the data itself ----------------------------------------------
+
+UnRate.density <- ggplot(data = agg.2013, mapping = aes(UnRate)) +
+                  geom_density()
+
+PCPI.density <- ggplot(data = agg.2013, mapping = aes(PCPI)) +
+                geom_density()
+
+CLF.density <- ggplot(data = agg.2013, mapping = aes(CLF)) +
+               geom_density()
+
+RP.density <- ggplot(data = agg.2013, mapping = aes(RP)) +
+              geom_density()
+
+CLF_RP.density <- ggplot(data = agg.2013, mapping = aes(CLF/RP)) +
+                  geom_density()
+
+
+UnRate.histogram <- ggplot(data = agg.2013, mapping = aes(UnRate)) +
+    geom_histogram()
+
+PCPI.histogram <- ggplot(data = agg.2013, mapping = aes(PCPI)) +
+    geom_histogram(aes(fill = ..count..)) + scale_fill_gradient("Count", low = "blue", high = "red")
+
+CLF.histogram <- ggplot(data = agg.2013, mapping = aes(CLF)) +
+                 geom_histogram(binwidth = 250000) +
+                 geom_vline(aes(xintercept = mean(CLF)), color = "red") +
+                 geom_vline(aes(xintercept = median(CLF)), color = "blue")
+
+RP.histogram <- ggplot(data = agg.2013, mapping = aes(RP)) +
+                geom_histogram(binwidth = 250000) +
+                geom_vline(aes(xintercept = mean(RP)), color = "red") +
+                geom_vline(aes(xintercept = median(RP)), color = "blue")
+
+CLF_RP.histogram <- ggplot(data = agg.2013, mapping = aes(CLF/RP)) +
+                    geom_histogram(aes(fill = ..count..)) +
+                    geom_vline(aes(xintercept = mean(CLF/RP)), color = "red") +
+                    geom_vline(aes(xintercept = median(CLF/RP)), color = "blue") +
+                    scale_fill_gradient("Count", low = "blue", high = "red")
+
 # Unemployment Rate vs Per Capita Personal Income -------------------------
 
 ### . ~ PartyWinner
-plot.1.1 <- ggplot(data = agg.2013, mapping = aes(x = Value.x, y = Value.y)) +
+plot.1.1 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI)) +
             geom_point(alpha = 1/4) + geom_smooth() +
             ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
             labs(x = "Unemployment Rate", y = "Per Capita Personal Income") +
             facet_grid(. ~ PartyWinner)
 
-plot.1.2 <- ggplot(data = agg.2013, mapping = aes(x = Value.x, y = Value.y, color = factor(PartyWinner))) +
+plot.1.2 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(PartyWinner))) +
             geom_point(alpha = 1/2) + geom_smooth() +
             ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
             labs(x = "Unemployment Rate", y = "Per Capita Personal Income")
 
 ### . ~ DemWinner
-plot.2.1 <- ggplot(data = agg.2013, mapping = aes(x = Value.x, y = Value.y)) +
+plot.2.1 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI)) +
           geom_point(alpha = 1/4) + geom_smooth() +
           ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
           labs(x = "Unemployment Rate", y = "Per Capita Personal Income") +
           facet_grid(. ~ DemWinner)
 
-plot.2.2 <- ggplot(data = agg.2013, mapping = aes(x = Value.x, y = Value.y, color = factor(DemWinner))) +
+plot.2.2 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(DemWinner))) +
             geom_point(alpha = 1/3) + geom_smooth() +
             ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income\n Bernie Sanders vs Hillary Clinton") +
             labs(x = "Unemployment Rate", y = "Per Capita Personal Income") + 
             scale_color_manual("Candidates", labels = c("Bernie Sanders", "Hillary Clinton"), values = c("blue", "red"))
 
 ### . ~ RepWinner
-plot.3.1. <- ggplot(data = agg.2013, mapping = aes(x = Value.x, y = Value.y)) +
+plot.3.1 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI)) +
           geom_point(alpha = 1/4) + geom_smooth() +
           ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
           labs(x = "Unemployment Rate", y = "Per Capita Personal Income") +
           facet_grid(. ~ RepWinner)
 
-plot.3.2 <- ggplot(data = agg.2013, mapping = aes(x = Value.x, y = Value.y, color = factor(RepWinner))) +
+plot.3.2 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(RepWinner))) +
             geom_point(alpha = 1/2) + geom_smooth() +
             ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
             labs(x = "Unemployment Rate", y = "Per Capita Personal Income")
