@@ -4,6 +4,7 @@ library(plyr)
 library(dplyr)
 library(lubridate)
 library(ggplot2)
+library(scales) ## for the object percent in scales_x_continuous()
 source("~/R/TexasPrimary2016/Functions/agg.functions.R")
 load("~/R/TexasPrimary2016/Data/FRED/fred.cat.list.RData")
 load("~/R/TexasPrimary2016/Data/Election/tex.results.RData")
@@ -64,43 +65,41 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
 
 # Looking at the data itself ----------------------------------------------
 
-UnRate.density <- ggplot(data = agg.2013, mapping = aes(UnRate)) +
-                  geom_density()
+### UnRate
+    UnRate.dist <- ggplot(data = agg.2013, mapping = aes(UnRate, fill = PartyWinner)) +
+                   geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
+                   geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1)
+    UnRate.dist + facet_grid(. ~ PartyWinner)
 
-PCPI.density <- ggplot(data = agg.2013, mapping = aes(PCPI)) +
-                geom_density()
-
-CLF.density <- ggplot(data = agg.2013, mapping = aes(CLF)) +
-               geom_density()
-
-RP.density <- ggplot(data = agg.2013, mapping = aes(RP)) +
-              geom_density()
-
-CLF_RP.density <- ggplot(data = agg.2013, mapping = aes(CLF/RP)) +
-                  geom_density()
-
-
-UnRate.histogram <- ggplot(data = agg.2013, mapping = aes(UnRate)) +
-    geom_histogram()
-
-PCPI.histogram <- ggplot(data = agg.2013, mapping = aes(PCPI)) +
-    geom_histogram(aes(fill = ..count..)) + scale_fill_gradient("Count", low = "blue", high = "red")
-
-CLF.histogram <- ggplot(data = agg.2013, mapping = aes(CLF)) +
-                 geom_histogram(binwidth = 250000) +
-                 geom_vline(aes(xintercept = mean(CLF)), color = "red") +
-                 geom_vline(aes(xintercept = median(CLF)), color = "blue")
-
-RP.histogram <- ggplot(data = agg.2013, mapping = aes(RP)) +
-                geom_histogram(binwidth = 250000) +
-                geom_vline(aes(xintercept = mean(RP)), color = "red") +
-                geom_vline(aes(xintercept = median(RP)), color = "blue")
-
-CLF_RP.histogram <- ggplot(data = agg.2013, mapping = aes(CLF/RP)) +
-                    geom_histogram(aes(fill = ..count..)) +
-                    geom_vline(aes(xintercept = mean(CLF/RP)), color = "red") +
-                    geom_vline(aes(xintercept = median(CLF/RP)), color = "blue") +
-                    scale_fill_gradient("Count", low = "blue", high = "red")
+### PCPI
+    PCPI.dist <- ggplot(data = agg.2013, mapping = aes(PCPI)) +
+                 geom_histogram(aes(y = ..density.., fill = ..count..), bins = 50) +
+                 geom_density(alpha = .1, fill = "#7FDBFF") +
+                 scale_fill_gradient("Count", low = "#001F3F", high = "#FF4136")
+    PCPI.dist2 <- ggplot(data = agg.2013, mapping = aes(PCPI, fill = PartyWinner)) +
+                  geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
+                  geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1)
+    PCPI.dist2
+    PCPI.dist + facet_grid(. ~ PartyWinner)
+    
+### CLF
+    CLF.dist <- ggplot(data = agg.2013, mapping = aes(CLF)) +
+                geom_histogram(aes(y = ..density..), bins = 25) +
+                geom_density(alpha = .1, fill = "#7FDBFF")
+    CLF.dist + facet_grid(. ~ PartyWinner)
+    
+### RP
+    RP.dist <- ggplot(data = agg.2013, mapping = aes(RP)) +
+               geom_histogram(aes(y = ..density..), bins =  25) +
+               geom_density(alpha = .1, fill = "#7FDBFF")
+    RP.dist + facet_grid(. ~ PartyWinner)
+    
+### CLF_RP (CLF divided by RP)
+    CLF_RP.dist <- ggplot(data = agg.2013, mapping = aes(((CLF/1000)/RP), fill = PartyWinner)) +
+                   geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
+                   geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) +
+                   scale_x_continuous(labels = percent)
+    CLF_RP.dist + facet_grid(. ~ PartyWinner)
 
 # Unemployment Rate vs Per Capita Personal Income -------------------------
 
