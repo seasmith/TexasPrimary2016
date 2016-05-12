@@ -4,7 +4,7 @@ library(plyr)
 library(dplyr)
 library(lubridate)
 library(ggplot2)
-library(scales) ## for the object percent in scales_x_continuous()
+library(scales) ## for the percent object in scales_x_continuous()
 source("~/R/TexasPrimary2016/Functions/agg.functions.R")
 load("~/R/TexasPrimary2016/Data/FRED/fred.cat.list.RData")
 load("~/R/TexasPrimary2016/Data/Election/tex.results.RData")
@@ -33,10 +33,11 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
             rename(UnRate = Value.x, PCPI = Value.y) %>%
             merge(clf.2013, by = "CountyName") %>%
             merge(rp.2013, by = "CountyName") %>%
-            rename(CLF = Value.x, RP = Value.y)
+            rename(CLF = Value.x, RP = Value.y) %>%
+            mutate(CLF_RP = (CLF/RP)/1000)
 
 
-# Add Election Turnout Winner (Party) -------------------------------------
+# Add Election Turnout Winner ---------------------------------------------
 
     
 ### Party winner (democrat or republican)
@@ -63,165 +64,161 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
     agg.2013$RepWinner <- RepWinner
 
 
-# Looking at the data itself ----------------------------------------------
+# Plot formatting ---------------------------------------------------------
+
+### Party colors (BLUE = Democratic; RED = Republican)
+    party.colors.1 <- scale_color_manual(values = c("#0000FF", "#FF0000"))
+    party.colors.2 <- scale_fill_manual(values = c("#0000FF", "#FF0000"))
+    
+
+# Distribution of Data ----------------------------------------------------
+
 
 ### UnRate
     UnRate.dist <- ggplot(data = agg.2013, mapping = aes(UnRate, fill = PartyWinner)) +
                    geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
-                   geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1)
+                   geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) + 
+                   party.colors.1 + party.colors.2
+    UnRate.dist
     UnRate.dist + facet_grid(. ~ PartyWinner)
 
 ### PCPI
-    PCPI.dist <- ggplot(data = agg.2013, mapping = aes(PCPI)) +
-                 geom_histogram(aes(y = ..density.., fill = ..count..), bins = 50) +
-                 geom_density(alpha = .1, fill = "#7FDBFF") +
-                 scale_fill_gradient("Count", low = "#001F3F", high = "#FF4136")
-    PCPI.dist2 <- ggplot(data = agg.2013, mapping = aes(PCPI, fill = PartyWinner)) +
-                  geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
-                  geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1)
-    PCPI.dist2
+    PCPI.dist <- ggplot(data = agg.2013, mapping = aes(PCPI, fill = PartyWinner)) +
+                 geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
+                 geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) + 
+                 party.colors.1 + party.colors.2
+    PCPI.dist
     PCPI.dist + facet_grid(. ~ PartyWinner)
-    
+   
 ### CLF
-    CLF.dist <- ggplot(data = agg.2013, mapping = aes(CLF)) +
-                geom_histogram(aes(y = ..density..), bins = 25) +
-                geom_density(alpha = .1, fill = "#7FDBFF")
+    CLF.dist <- ggplot(data = agg.2013, mapping = aes(CLF, fill = PartyWinner)) +
+                geom_histogram(aes(y = ..density..), bins = 25, alpha = .5) +
+                geom_density(aes(color = PartyWinner), alpha = .1) +
+                party.colors.1 + party.colors.2
+    CLF.dist
     CLF.dist + facet_grid(. ~ PartyWinner)
     
 ### RP
-    RP.dist <- ggplot(data = agg.2013, mapping = aes(RP)) +
-               geom_histogram(aes(y = ..density..), bins =  25) +
-               geom_density(alpha = .1, fill = "#7FDBFF")
+    RP.dist <- ggplot(data = agg.2013, mapping = aes(RP, fill = PartyWinner)) +
+               geom_histogram(aes(y = ..density..), bins =  25, alpha = .5) +
+               geom_density(aes(color = PartyWinner), alpha = .1) +
+               party.colors.1 + party.colors.2
+    RP.dist
     RP.dist + facet_grid(. ~ PartyWinner)
     
 ### CLF_RP (CLF divided by RP)
     CLF_RP.dist <- ggplot(data = agg.2013, mapping = aes(((CLF/1000)/RP), fill = PartyWinner)) +
                    geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
                    geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) +
-                   scale_x_continuous(labels = percent)
+                   scale_x_continuous(labels = percent) +
+                   party.colors.1 + party.colors.2
+    CLF_RP.dist
     CLF_RP.dist + facet_grid(. ~ PartyWinner)
 
-# Unemployment Rate vs Per Capita Personal Income -------------------------
 
+# Scatterplot - UnRate ~ PCPI ---------------------------------------------
+
+
+### Unfaceted
+    UnRate.PCPI <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI)) +
+                   geom_point(alpha = 1/4) + geom_smooth()
+    UnRate.PCPI
+    
 ### . ~ PartyWinner
-plot.1.1 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI)) +
-            geom_point(alpha = 1/4) + geom_smooth() +
-            ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
-            labs(x = "Unemployment Rate", y = "Per Capita Personal Income") +
-            facet_grid(. ~ PartyWinner)
+    UnRate.PCPI.PartyWinner <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = PartyWinner)) +
+                               geom_point(alpha = 1/2) + geom_smooth() +
+                               ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
+                               labs(x = "Unemployment Rate", y = "Per Capita Personal Income") + 
+                               party.colors.1 + party.colors.2
+    UnRate.PCPI.PartyWinner
+    UnRate.PCPI.PartyWinner + facet_grid(. ~ PartyWinner)
+    
+    
+### . ~ DemWinner
+    UnRate.PCPI.DemWinner <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(DemWinner))) +
+                             geom_point(alpha = 1/3) + geom_smooth() +
+                             ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income\n Bernie Sanders vs Hillary Clinton") +
+                             labs(x = "Unemployment Rate", y = "Per Capita Personal Income") + 
+                             scale_color_manual("Candidates", labels = c("Bernie Sanders", "Hillary Clinton"), values = c("blue", "red"))
+    UnRate.PCPI.DemWinner
+    UnRate.PCPI.DemWinner + facet_grid(. ~ DemWinner)
+    
+### . ~ RepWinner
+    UnRate.PCPI.RepWinner <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(RepWinner))) +
+                             geom_point(alpha = 1/2) + geom_smooth() +
+                             ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
+                             labs(x = "Unemployment Rate", y = "Per Capita Personal Income") +
+                             scale_color_manual("Candidates", labels = c("Donald Trump", "Ted Cruz"), values = c("blue", "red"))
+    UnRate.PCPI.RepWinner
+    UnRate.PCPI.RepWinner + facet_grid(. ~ RepWinner)
+    
 
-plot.1.2 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(PartyWinner))) +
-            geom_point(alpha = 1/2) + geom_smooth() +
-            ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
-            labs(x = "Unemployment Rate", y = "Per Capita Personal Income")
+
+# Scatterplot - UnRate ~ CLF_RP -------------------------------------------
+
+
+### Unfaceted
+    CLF_RP.UnRate <- ggplot(data = agg.2013, mapping = aes(UnRate, CLF_RP)) + geom_point(alpha = 1/4) + geom_smooth()
+    CLF_RP.UnRate
+    
+### . ~ PartyWinner
+    CLF_RP.UnRate.PartyWinner <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = CLF_RP, color = PartyWinner)) +
+                                 geom_point(alpha = 1/2) + geom_smooth() +
+                                 ggtitle("Texas Counties 2013:\nUnemployment Rate vs (Civilian Labor Force/Residential Population)") +
+                                 labs(x = "Unemployment Rate", y = "(Civilian Labor Force/Residential Population)") + 
+                                 party.colors.1 + party.colors.2
+    CLF_RP.UnRate.PartyWinner
+    CLF_RP.UnRate.PartyWinner + facet_grid(. ~ PartyWinner)
 
 ### . ~ DemWinner
-plot.2.1 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI)) +
-          geom_point(alpha = 1/4) + geom_smooth() +
-          ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
-          labs(x = "Unemployment Rate", y = "Per Capita Personal Income") +
-          facet_grid(. ~ DemWinner)
-
-plot.2.2 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(DemWinner))) +
-            geom_point(alpha = 1/3) + geom_smooth() +
-            ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income\n Bernie Sanders vs Hillary Clinton") +
-            labs(x = "Unemployment Rate", y = "Per Capita Personal Income") + 
-            scale_color_manual("Candidates", labels = c("Bernie Sanders", "Hillary Clinton"), values = c("blue", "red"))
+    CLF_RP.UnRate.DemWinner <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = CLF_RP, color = DemWinner)) +
+                               geom_point(alpha = 1/2) + geom_smooth() +
+                               ggtitle("Texas Counties 2013:\nUnemployment Rate vs (Civilian Labor Force/Residential Population)") +
+                               labs(x = "Unemployment Rate", y = "(Civilian Labor Force/Residential Population)") + 
+                               scale_color_manual("Candidates", labels = c("Bernie Sanders", "Hillary Clinton"), values = c("blue", "red"))
+    CLF_RP.UnRate.DemWinner
+    CLF_RP.UnRate.DemWinner + facet_grid(. ~ DemWinner)
 
 ### . ~ RepWinner
-plot.3.1 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI)) +
-          geom_point(alpha = 1/4) + geom_smooth() +
-          ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
-          labs(x = "Unemployment Rate", y = "Per Capita Personal Income") +
-          facet_grid(. ~ RepWinner)
-
-plot.3.2 <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = PCPI, color = factor(RepWinner))) +
-            geom_point(alpha = 1/2) + geom_smooth() +
-            ggtitle("Texas Counties 2013:\nUnemployment Rate vs Per Capita Personal Income") +
-            labs(x = "Unemployment Rate", y = "Per Capita Personal Income")
+    CLF_RP.UnRate.RepWinner <- ggplot(data = agg.2013, mapping = aes(x = UnRate, y = CLF_RP, color = RepWinner)) +
+                               geom_point(alpha = 1/2) + geom_smooth() +
+                               ggtitle("Texas Counties 2013:\nUnemployment Rate vs (Civilian Labor Force/Residential Population)") +
+                               labs(x = "Unemployment Rate", y = "(Civilian Labor Force/Residential Population)") + 
+                               scale_color_manual("Candidates", labels = c("Donald Trump", "Ted Cruz"), values = c("blue", "red"))
+    CLF_RP.UnRate.RepWinner
+    CLF_RP.UnRate.RepWinner + facet_grid(. ~ RepWinner)
 
 
-# CLF, RP, UnRate, PCPI ---------------------------------------------------
-
-ggplot(data = agg.2013, mapping = aes(UnRate, CLF_RP)) + geom_point()
-ggplot(data = agg.2013, mapping = aes(PCPI, CLF_RP)) + geom_point()
+# Scatterplot - PCPI ~ CLF_RP ---------------------------------------------
 
 
+### Unfaceted
+    CLF_RP.PCPI <- ggplot(data = agg.2013, mapping = aes(PCPI, CLF_RP)) + geom_point(alpha = 1/4) + geom_smooth()
+    CLF_RP.PCPI
 
-# # Example -----------------------------------------------------------------
-# 
-# 
-# # subset harris county
-# harris.clfn <- fred.tables$`Civilian Labor Force` %>% select(Date, TXHARR1LFN)
-# 
-# # subset by a year
-# this.year    <- ""
-# year.summary <- harris.clfn[year(harris.clfn$Date) == this.year, ]
-# 
-# # summarize yearly data
-# year.mean <- colMeans(year.summary[,2])
-# 
-# # loop every year
-# years.to.loop <- year(harris.clfn$Date) %>% unique()
-# lapply(seq_along(years.to.loop), function(x){
-#     year.summary <- harris.clfn[year(harris.clfn$Date) == years.to.loop[x], ]
-#     monthly.clfn <- as.numeric(as.character(year.summary[, 2]))
-#     year.mean    <- mean(monthly.clfn)
-#     data.frame(Year = years.to.loop[x], Harris = year.mean)
-# }) %>% ldply()
-# 
-# # Actual FUN --------------------------------------------------------------
-# 
-# 
-# # subset a table by a county
-# county.subset <- function(table, county){
-#     subseted <- table %>% select(Date, county)
-#     return(subsetted)
-# }
-# 
-# # subset a table by year
-# year.subset <- function(table, year){
-#     subsetted <- table[year(table$Date) == year, ]
-#     return(subsetted)
-# }
-# 
-#         # subset a table by every year
-#                 # returns a list object
-#                 # each list element corresponds to a year
-#                 # each list element contains a data frame of yearly values
-#         all.years.subset <- function(table){
-#             table.subset  <- table %>% select(1)
-#             years.to.loop <- table.subset[[1]] %>% year() %>% unique()
-#             env.table     <- table
-#             lapply(seq_along(years.to.loop), function(X, table = env.table){
-#                 year.subset(table = table, year = years.to.loop[X])
-#             })
-#         }
-# 
-# # summarize yearly data
-# mean.subset <- function(table){
-#     val <- table[,-1] %>% as.character() %>% as.numeric()
-#     subsetted <- mean(val)
-#     return(subsetted)
-# }
-# 
-#         # summarize a list of yearly data
-#         all.years.annualized <- function(list){
-#             lapply(seq_along(list), function(x){
-#                 
-#             })
-#         }
-# 
-# # loop everything
-# 
-# annual.table.loop <- function(table){
-# ## set pre-loop variables
-#     columns.to.loop <- dim(table)[2] - 1
-#     counties        <- table %>% select(-1) %>% names
-#     years.to.subset <- table %>% select(1) %>% year() %>% unique()
-#     
-#     lapply(seq_along(columns.to.loop), function(x){
-#         county.table <- county.subset(table = table, county = counties[x])
-#         year.table   <- year.subset(county.table)
-#     })
-# }
+### . ~ PartyWinner
+    CLF_RP.PCPI.PartyWinner <- ggplot(data = agg.2013, mapping = aes(x = PCPI, y = CLF_RP, color = PartyWinner)) +
+                               geom_point(alpha = 1/2) + geom_smooth() +
+                               ggtitle("Texas Counties 2013:\nPer Capita Personal Income vs (Civilian Labor Force/Residential Population)") +
+                               labs(x = "Per Capita Personal Income", y = "(Civilian Labor Force/Residential Population)") + 
+                               party.colors.1 + party.colors.2
+    CLF_RP.PCPI.PartyWinner
+    CLF_RP.PCPI.PartyWinner + facet_grid(. ~ PartyWinner)
+    
+### . ~ DemWinner
+    CLF_RP.PCPI.DemWinner <- ggplot(data = agg.2013, mapping = aes(x = PCPI, y = CLF_RP, color = DemWinner)) +
+                             geom_point(alpha = 1/2) + geom_smooth() +
+                             ggtitle("Texas Counties 2013:\nPer Capita Personal Income vs (Civilian Labor Force/Residential Population)") +
+                             labs(x = "Per Capita Personal Income", y = "(Civilian Labor Force/Residential Population)") + 
+                             scale_color_manual("Candidates", labels = c("Bernie Sanders", "Hillary Clinton"), values = c("blue", "red"))
+    CLF_RP.PCPI.DemWinner
+    CLF_RP.PCPI.DemWinner + facet_grid(. ~ DemWinner)
+    
+### . ~ RepWinner
+    CLF_RP.PCPI.RepWinner <- ggplot(data = agg.2013, mapping = aes(x = PCPI, y = CLF_RP, color = RepWinner)) +
+                             geom_point(alpha = 1/2) + geom_smooth() +
+                             ggtitle("Texas Counties 2013:\nPer Capita Personal Income vs (Civilian Labor Force/Residential Population)") +
+                             labs(x = "Per Capita Personal Income", y = "(Civilian Labor Force/Residential Population)") + 
+                             scale_color_manual("Candidates", labels = c("Donald Trump", "Ted Cruz"), values = c("blue", "red"))
+    CLF_RP.PCPI.RepWinner
+    CLF_RP.PCPI.RepWinner + facet_grid(. ~ RepWinner)
