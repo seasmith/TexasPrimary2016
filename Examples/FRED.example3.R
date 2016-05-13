@@ -2,7 +2,7 @@
 
 library(plyr)
 library(dplyr)
-library(lubridate)
+#library(lubridate) ## added to agg.function.R
 library(ggplot2)
 library(scales) ## for the percent object in scales_x_continuous()
 source("~/R/TexasPrimary2016/Functions/agg.functions.R")

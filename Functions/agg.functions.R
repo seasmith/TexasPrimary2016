@@ -1,5 +1,5 @@
 library(dplyr)
-
+library(lubridate)
 
 # annual.average() --------------------------------------------------------
 
