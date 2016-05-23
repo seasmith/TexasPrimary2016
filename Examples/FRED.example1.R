@@ -5,7 +5,10 @@
 library(rvest)
 library(plyr)
 library(dplyr)
-source("~/R/TexasPrimary2016/Functions/scraper.functions.R")
+wd <- getwd() ## for sourcing and saving
+dir.create(file.path(wd, "Data"), showWarnings = FALSE) ## for saving
+dir.create(file.path(wd, "Data", "FRED"), showWarnings = FALSE) ## for saving
+source(file.path(wd,"Functions", "scraper.functions.R"))
 myapi <- "" # set your API here
 
 
@@ -65,7 +68,7 @@ myapi <- "" # set your API here
 ## combine the two data frames and save
     fred.series <- rbind(fred.series1, fred.series2) %>%
                    arrange(Release, Category, CountyName)
-    save(fred.series, file = "~/R/TexasPrimary2016/Data/FRED/fred.series.RData")
+    save(fred.series, file = file.path(wd, "Data", "FRED", "fred.series.RData"))
 
 
 # Run the Data Function ---------------------------------------------------
@@ -112,4 +115,4 @@ myapi <- "" # set your API here
 
 ## concatenate fred.obs[x] and save as one R object
     fred.obs <- c(fred.obs1, fred.obs2)
-    save(fred.obs, file = "~/R/TexasPrimary2016/Data/FRED/fred.obs.RData")
+    save(fred.obs, file = file.path(wd, "Data", "FRED", "fred.obs.RData"))

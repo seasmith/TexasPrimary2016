@@ -8,6 +8,9 @@ library(choroplethr)
 library(choroplethrMaps)
 library(gridExtra)
 library(knitr)
+wd <- getwd() ## for saving
+dir.create(file.path(wd, "Data"), showWarnings = FALSE)
+dir.create(file.path(wd, "Data", "Election"), showWarnings = FALSE)
 
 # Texas election data: http://elections.sos.state.tx.us/index.htm
 
@@ -144,7 +147,7 @@ tex.turnout$value <- tex.turnout$TotalTurnOut
 
 # Save Results ------------------------------------------------------------
 
-save(tex.rep, file = "Data/Election/tex.rep.RData")
-save(tex.dem, file = "Data/Election/tex.dem.RData")
-save(tex.turnout, file = "Data/Election/tex.turnout.RData")
-save(tex.results, file = "Data/Election/tex.results.RData")
+save(tex.rep, file = file.path(wd, "Data", "Election", "tex.rep.RData"))
+save(tex.dem, file = file.path(wd, "Data", "Election", "tex.dem.RData"))
+save(tex.turnout, file = file.path(wd, "Data", "Election", "tex.turnout.RData"))
+save(tex.results, file = file.path(wd, "Data", "Election", "tex.results.RData"))

@@ -6,9 +6,11 @@ library(dplyr, quietly = T)
 library(rvest, quietly = T)
 library(choroplethrMaps, quietly = T)
 library(lubridate, quietly = T)
-source("~/R/TexasPrimary2016/Functions/cat.functions.R")
-load("~/R/TexasPrimary2016/Data/FRED/fred.series")
-load("~/R/TexasPrimary2016/Data/FRED/fred.obs")
+wd <- getwd() ## for sourcing and saving
+dir.create(file.path(wd, "Data", "TableFiles"), showWarnings = FALSE)
+source(file.path(wd, "Functions", "cat.functions.R"))
+load(file.path(wd, "Data", "FRED", "fred.series"))
+load(file.path(wd, "Data", "FRED", "fred.obs"))
 data("county.regions")
 
 
@@ -21,7 +23,7 @@ tx.regions <- filter(county.regions, state.name == "texas") %>%
 # Create Master Table -----------------------------------------------------
 
 fred.master <- cat.info(fred.series)
-save(fred.master, file = "~/R/TexasPrimary2016/FRED/fred.master.RData")
+save(fred.master, file = file.path(wd, "Data", "FRED", "fred.master.RData"))
 
 
 # All in one --------------------------------------------------------------
@@ -41,7 +43,7 @@ save(fred.master, file = "~/R/TexasPrimary2016/FRED/fred.master.RData")
                     cat          = fred.master$category[x])
     })
 names(fred.cat.list) <- fred.master$category
-save(fred.cat.list, file = "~/R/TexasPrimary2016/Data/FRED/fred.cat.list.RData")
+save(fred.cat.list, file = file.path(wd, "Data", "FRED", "fred.cat.list.RData"))
 
 # This function merges the data frames in each list element
 # The result is a massive data frame in each of the 10 list elements
@@ -52,7 +54,7 @@ save(fred.cat.list, file = "~/R/TexasPrimary2016/Data/FRED/fred.cat.list.RData")
     })
 names(fred.tables) <- fred.master$category
 # fred.tables   <- fred.tables %>% select(-1) %>% as.character() %>% as.numeric()
-save(fred.tables, file = "~/R/TexasPrimary2016/Data/FRED/fred.tables.RData")
+save(fred.tables, file = file.path(wd, "Data", "FRED", "fred.tables.RData"))
 
 # write all 10 data frames to a file
 # extension = ".txt"
