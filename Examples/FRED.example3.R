@@ -29,10 +29,10 @@ load("~/R/TexasPrimary2016/Data/Election/tex.results.RData")
 # Merge Data --------------------------------------------------------------
 
     
-agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
+agg.2013 <- left_join(ur.2013, pcpi.2013, by = "CountyName") %>%
             rename(UnRate = Value.x, PCPI = Value.y) %>%
-            merge(clf.2013, by = "CountyName") %>%
-            merge(rp.2013, by = "CountyName") %>%
+            left_join(clf.2013, by = "CountyName") %>%
+            left_join(rp.2013, by = "CountyName") %>%
             rename(CLF = Value.x, RP = Value.y) %>%
             mutate(CLF_RP = (CLF/RP)/1000)
 
@@ -62,6 +62,13 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
     agg.2013$PartyWinner <- PartyWinner
     agg.2013$DemWinner <- DemWinner
     agg.2013$RepWinner <- RepWinner
+    
+### Join agg.2013 with tex.results
+    agg.2013 <- left_join(agg.2013, tex.results, by = "CountyName")
+    ### Create new directory and save aggregated data
+        dir.create(file.path("Data", "Aggregated"), showWarnings = FALSE)
+        wd <- getwd()
+        save(agg.2013, file = file.path(wd, "Data", "Aggregated", "agg.2013.RData"))
 
 
 # Plot formatting ---------------------------------------------------------
@@ -73,6 +80,20 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
 
 # Distribution of Data ----------------------------------------------------
 
+    # variables <- c("UnRate", "PCPI", "CLF", "RP", "CLF_RP")
+    # 
+    # distribution.plots <-  variables %>%
+    #     lapply(., function(x){
+    #         ggplot(data = agg.2013, mapping = aes(x, fill = PartyWinner))
+    #     })
+    # 
+    # names(distribution.plots) <- variables
+    # 
+    # histogram.bins.50 <- geom_histogram(aes(y = ..density..), bins =  50, alpha = .5)
+    # histogram.bins.25 <- geom_histogram(aes(y = ..density..), bins =  25, alpha = .5)
+    # density           <- geom_density(aes(color = PartyWinner), alpha = .1)
+    # facet.PartyWinner <- facet_grid(. ~ PartyWinner)    
+
 
 ### UnRate
     UnRate.dist <- ggplot(data = agg.2013, mapping = aes(UnRate, fill = PartyWinner)) +
@@ -80,23 +101,43 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
                    geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) + 
                    party.colors.1 + party.colors.2
     UnRate.dist
-    UnRate.dist + facet_grid(. ~ PartyWinner)
-
+    UnRate.dist + facet_grid(. ~ PartyWinner) +
+                  geom_vline(data = agg.2013,
+                             aes(xintercept=mean(UnRate),linetype="dashed")) +
+                  geom_vline(data = agg.2013,
+                             aes(xintercept=median(UnRate), linetype="solid")) +
+                  scale_linetype_identity(guide="legend", label = c("Mean", "Median"))
+    #+
+                  # geom_text(aes(0,median(UnRate),label = paste("Median =",round(median(UnRate), 2))),
+                  #           vjust = 0,
+                  #           hjust = 0) +
+                  # geom_text(aes(0,mean(UnRate),label = paste("Mean =",round(mean(UnRate), 2))),
+                  #           vjust = 3,
+                  #           hjust = 0)
 ### PCPI
     PCPI.dist <- ggplot(data = agg.2013, mapping = aes(PCPI, fill = PartyWinner)) +
                  geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
                  geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) + 
                  party.colors.1 + party.colors.2
     PCPI.dist
-    PCPI.dist + facet_grid(. ~ PartyWinner)
-   
+    PCPI.dist + facet_grid(. ~ PartyWinner) +
+                geom_vline(data = agg.2013,
+                           aes(xintercept=mean(PCPI)),
+                           linetype="dashed") +
+                geom_vline(data = agg.2013,
+                           aes(xintercept=median(PCPI)))
 ### CLF
     CLF.dist <- ggplot(data = agg.2013, mapping = aes(CLF, fill = PartyWinner)) +
                 geom_histogram(aes(y = ..density..), bins = 25, alpha = .5) +
                 geom_density(aes(color = PartyWinner), alpha = .1) +
                 party.colors.1 + party.colors.2
     CLF.dist
-    CLF.dist + facet_grid(. ~ PartyWinner)
+    CLF.dist + facet_grid(. ~ PartyWinner) +
+               geom_vline(data = agg.2013,
+                          aes(xintercept=mean(CLF)),
+                          linetype="dashed") +
+               geom_vline(data = agg.2013,
+                          aes(xintercept=median(CLF)))
     
 ### RP
     RP.dist <- ggplot(data = agg.2013, mapping = aes(RP, fill = PartyWinner)) +
@@ -104,7 +145,12 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
                geom_density(aes(color = PartyWinner), alpha = .1) +
                party.colors.1 + party.colors.2
     RP.dist
-    RP.dist + facet_grid(. ~ PartyWinner)
+    RP.dist + facet_grid(. ~ PartyWinner) +
+              geom_vline(data = agg.2013,
+                         aes(xintercept=mean(RP)),
+                         linetype="dashed") +
+              geom_vline(data = agg.2013,
+                         aes(xintercept=median(RP)))
     
 ### CLF_RP (CLF divided by RP)
     CLF_RP.dist <- ggplot(data = agg.2013, mapping = aes(((CLF/1000)/RP), fill = PartyWinner)) +
@@ -113,7 +159,12 @@ agg.2013 <- merge(ur.2013, pcpi.2013, by = "CountyName") %>%
                    scale_x_continuous(labels = percent) +
                    party.colors.1 + party.colors.2
     CLF_RP.dist
-    CLF_RP.dist + facet_grid(. ~ PartyWinner)
+    CLF_RP.dist + facet_grid(. ~ PartyWinner) +
+                  geom_vline(data = agg.2013,
+                             aes(xintercept=mean(CLF_RP)),
+                             linetype="dashed") +
+                  geom_vline(data = agg.2013,
+                             aes(xintercept=median(CLF_RP)))
 
 
 # Scatterplot - UnRate ~ PCPI ---------------------------------------------
