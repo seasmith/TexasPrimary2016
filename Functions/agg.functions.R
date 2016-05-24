@@ -7,8 +7,8 @@ library(lubridate)
 # df example: df = fred.cat.list$`Unemployment Rate`
 annual.average <- function(df, date = 2013){
     aa.vector <- sapply(seq_along(df), function(x, year = date){
-        df.year <- df[[x]][year(df[[x]]$Date) == year, ]
-        df.year.average <- df.year$Value %>%
+            df.year <- df[[x]][year(df[[x]]$Date) == year, ]
+            df.year.average <- df.year$Value %>%
             as.character.factor() %>%
             as.numeric() %>%
             mean()
@@ -24,8 +24,8 @@ annual.average <- function(df, date = 2013){
 
 annual.value <- function(df, date = 2013){
     av.vector <- sapply(seq_along(df), function(x, year = date){
-        df.year <- df[[x]][year(df[[x]]$Date) == year, ]
-        df.year.value <- df.year$Value %>% 
+            df.year <- df[[x]][year(df[[x]]$Date) == year, ]
+            df.year.value <- df.year$Value %>% 
             as.character.factor() %>%
             as.numeric()
     })
