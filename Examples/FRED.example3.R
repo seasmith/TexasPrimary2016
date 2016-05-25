@@ -5,9 +5,10 @@ library(dplyr)
 #library(lubridate) ## added to agg.function.R
 library(ggplot2)
 library(scales) ## for the percent object in scales_x_continuous()
-source("~/R/TexasPrimary2016/Functions/agg.functions.R")
-load("~/R/TexasPrimary2016/Data/FRED/fred.cat.list.RData")
-load("~/R/TexasPrimary2016/Data/Election/tex.results.RData")
+wd <- getwd() ## for sourcing and saving
+source(file.path(wd, "Functions", "agg.functions.R"))
+load(file.path(wd, "Data", "FRED", "fred.cat.list.RData"))
+load(file.path(wd, "Data", "Election", "tex.results.RData"))
 
 
 # Create 2013 tables ------------------------------------------------------
