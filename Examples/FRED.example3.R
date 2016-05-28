@@ -2,11 +2,11 @@
 
 library(plyr)
 library(dplyr)
-#library(lubridate) ## added to agg.function.R
 library(ggplot2)
-library(scales) ## for the percent object in scales_x_continuous()
-wd <- getwd() ## for sourcing and saving
+library(scales)   ## for the percent object in scales_x_continuous()
+wd <- getwd()     ## for sourcing and saving
 source(file.path(wd, "Functions", "agg.functions.R"))
+source(file.path(wd, "Functions", "dist.functions.R"))
 load(file.path(wd, "Data", "FRED", "fred.cat.list.RData"))
 load(file.path(wd, "Data", "Election", "tex.results.RData"))
 
@@ -68,7 +68,6 @@ agg.2013 <- left_join(ur.2013, pcpi.2013, by = "CountyName") %>%
     agg.2013 <- left_join(agg.2013, tex.results, by = "CountyName")
     ### Create new directory and save aggregated data
         dir.create(file.path("Data", "Aggregated"), showWarnings = FALSE)
-        wd <- getwd()
         save(agg.2013, file = file.path(wd, "Data", "Aggregated", "agg.2013.RData"))
 
 
@@ -81,92 +80,30 @@ agg.2013 <- left_join(ur.2013, pcpi.2013, by = "CountyName") %>%
 
 # Distribution of Data ----------------------------------------------------
 
-    # variables <- c("UnRate", "PCPI", "CLF", "RP", "CLF_RP")
-    # 
-    # distribution.plots <-  variables %>%
-    #     lapply(., function(x){
-    #         ggplot(data = agg.2013, mapping = aes(x, fill = PartyWinner))
-    #     })
-    # 
-    # names(distribution.plots) <- variables
-    # 
-    # histogram.bins.50 <- geom_histogram(aes(y = ..density..), bins =  50, alpha = .5)
-    # histogram.bins.25 <- geom_histogram(aes(y = ..density..), bins =  25, alpha = .5)
-    # density           <- geom_density(aes(color = PartyWinner), alpha = .1)
-    # facet.PartyWinner <- facet_grid(. ~ PartyWinner)    
+    
+    split.agg.2013 <- split.agg(data = agg.2013[ , 2:7], facet = "PartyWinner")
+    
+    distribution.plots <- mapply(FUN = dist.plot,
+                                 .data = split.agg.2013,
+                                 x.name = names(split.agg.2013),
+                                 SIMPLIFY = FALSE)
 
 
 ### UnRate
-    UnRate.dist <- ggplot(data = agg.2013, mapping = aes(UnRate, fill = PartyWinner)) +
-                   geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
-                   geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) + 
-                   party.colors.1 + party.colors.2
-    UnRate.dist
-    UnRate.dist + facet_grid(. ~ PartyWinner) +
-                  geom_vline(data = agg.2013,
-                             aes(xintercept=mean(UnRate),linetype="dashed")) +
-                  geom_vline(data = agg.2013,
-                             aes(xintercept=median(UnRate), linetype="solid")) +
-                  scale_linetype_identity(guide="legend", label = c("Mean", "Median"))
-    #+
-                  # geom_text(aes(0,median(UnRate),label = paste("Median =",round(median(UnRate), 2))),
-                  #           vjust = 0,
-                  #           hjust = 0) +
-                  # geom_text(aes(0,mean(UnRate),label = paste("Mean =",round(mean(UnRate), 2))),
-                  #           vjust = 3,
-                  #           hjust = 0)
+    distribution.plots$UnRate
+    
 ### PCPI
-    PCPI.dist <- ggplot(data = agg.2013, mapping = aes(PCPI, fill = PartyWinner)) +
-                 geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
-                 geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) + 
-                 party.colors.1 + party.colors.2
-    PCPI.dist
-    PCPI.dist + facet_grid(. ~ PartyWinner) +
-                geom_vline(data = agg.2013,
-                           aes(xintercept=mean(PCPI)),
-                           linetype="dashed") +
-                geom_vline(data = agg.2013,
-                           aes(xintercept=median(PCPI)))
+    distribution.plots$PCPI
+    
 ### CLF
-    CLF.dist <- ggplot(data = agg.2013, mapping = aes(CLF, fill = PartyWinner)) +
-                geom_histogram(aes(y = ..density..), bins = 25, alpha = .5) +
-                geom_density(aes(color = PartyWinner), alpha = .1) +
-                party.colors.1 + party.colors.2
-    CLF.dist
-    CLF.dist + facet_grid(. ~ PartyWinner) +
-               geom_vline(data = agg.2013,
-                          aes(xintercept=mean(CLF)),
-                          linetype="dashed") +
-               geom_vline(data = agg.2013,
-                          aes(xintercept=median(CLF)))
+    distribution.plots$CLF
     
 ### RP
-    RP.dist <- ggplot(data = agg.2013, mapping = aes(RP, fill = PartyWinner)) +
-               geom_histogram(aes(y = ..density..), bins =  25, alpha = .5) +
-               geom_density(aes(color = PartyWinner), alpha = .1) +
-               party.colors.1 + party.colors.2
-    RP.dist
-    RP.dist + facet_grid(. ~ PartyWinner) +
-              geom_vline(data = agg.2013,
-                         aes(xintercept=mean(RP)),
-                         linetype="dashed") +
-              geom_vline(data = agg.2013,
-                         aes(xintercept=median(RP)))
+    distribution.plots$RP
     
 ### CLF_RP (CLF divided by RP)
-    CLF_RP.dist <- ggplot(data = agg.2013, mapping = aes(((CLF/1000)/RP), fill = PartyWinner)) +
-                   geom_histogram(aes(y = ..density..), bins = 50, alpha = .5) +
-                   geom_density(mapping = aes(color = PartyWinner), alpha = .1, size = 1) +
-                   scale_x_continuous(labels = percent) +
-                   party.colors.1 + party.colors.2
-    CLF_RP.dist
-    CLF_RP.dist + facet_grid(. ~ PartyWinner) +
-                  geom_vline(data = agg.2013,
-                             aes(xintercept=mean(CLF_RP)),
-                             linetype="dashed") +
-                  geom_vline(data = agg.2013,
-                             aes(xintercept=median(CLF_RP)))
-
+    distribution.plots$CLF_RP
+    
 
 # Scatterplot - UnRate ~ PCPI ---------------------------------------------
 
