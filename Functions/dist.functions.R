@@ -16,7 +16,7 @@ split.agg <- function(data, facet = NULL){
     split.df <- function(x, facet){
         shdw.list <- data.frame()        ## to hold data in loop
         shdw.list <- data[,c(x, facet)]
-        colnames(shdw.list) <- c("Variable", "Facet")
+        colnames(shdw.list) <- c("Variable", facet)
         return(shdw.list)
     }
     
@@ -29,22 +29,27 @@ split.agg <- function(data, facet = NULL){
 
 ### create the function to loop through in mapply()
 dist.plot <- function(.data, x.name, facet.exists = TRUE){
-    ggplot(data = .data, mapping = aes(x = Variable, fill = Facet)) +
-        
-        xlab(x.name) +
-        
-        geom_histogram(aes(y = ..density..), bins =  50, alpha = .5) +
-        geom_density(aes(color = Facet), alpha = .1) +
-        
-        party.colors.1 +
-        party.colors.2 +
-        
-        facet_grid(. ~ Facet) +
-        geom_vline(data = .data,
-                   aes(xintercept = mean(Variable),linetype = "dashed"),
-                   size = 1) +
-        geom_vline(data = .data,
-                   aes(xintercept = median(Variable), linetype="solid"),
-                   size = 1) +
-        scale_linetype_identity(guide="legend", label = c("Mean", "Median"))
+    ### check to see if a facet exists in the data frame
+        if(!facet.exists){
+            Facet = NULL
+        }
+    ### begin writing the plot
+        ggplot(data = .data, mapping = aes(x = Variable, fill = Facet)) +
+            
+            xlab(x.name) +
+            
+            geom_histogram(aes(y = ..density..), bins =  50, alpha = .5) +
+            geom_density(aes(color = Facet), alpha = .1) +
+            
+            party.colors.1 +
+            party.colors.2 +
+            
+            facet_grid(. ~ Facet) +
+            geom_vline(data = .data,
+                       aes(xintercept = mean(Variable),linetype = "dashed"),
+                       size = 1) +
+            geom_vline(data = .data,
+                       aes(xintercept = median(Variable), linetype="solid"),
+                       size = 1) +
+            scale_linetype_identity(guide="legend", label = c("Mean", "Median"))
 }
