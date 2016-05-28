@@ -1,44 +1,66 @@
-### create variables for splitting the data frame into a list
-    x.vars <- c("UnRate", "PCPI", "CLF", "RP", "CLF_RP")
-    facet.var <- c("PartyWinner")
-    x.vars.search <- paste("^", x.vars, "$", sep = "", collapse = "|")
-    dist.plot.x.vars <- grep(x.vars.search, colnames(agg.2013))
-    dist.plot.facet.var <- grep(facet.var, colnames(agg.2013))
+# get.agg.names(cols, facet) ----------------------------------------------
 
-### split the data frame
-    .df <- lapply(dist.plot.x.vars, function(x){
-        agg.2013[,c(1, x, 7)]
-    })
-    ### name the columns of the data frames
-        .new.df <- lapply(seq_along(.df), function(x){
-            colnames(.df[[x]]) <- c("CountyName", "Variable", "PartyWinner")
-            return(.df[[x]])
-        })
-    ### name the data frames in the list
-        names(.new.df) <- x.vars
+
+    # get.agg.names <- function(cols, facet){
+    #         plot.index <- list()
+    #         dist.plot.cols <- which(colnames())
+    #         dist.plot.facet <- grep(facet, colnames(agg.2013))
+    #         plot.index <- list(dist.plot.cols, dist.plot.facet)
+    #         names(plot.index) <- c("cols", "facet")
+    #         return(plot.index)
+    # }
+
+
+# split.agg(cols, facets) -------------------------------------------------
+
+
+    split.agg <- function(data, facet = NULL){
+            
+            if(!is.null(facet) & (facet %in% names(data))){
+                data2 <- data[, !names(data) %in% facet]
+            } else{
+                data2 <- data
+            }
+                    split.df <- function(x, facet){
+                        shdw.list <- data.frame()        ## to hold data in loop
+                        shdw.list <- data[,c(x, facet)]
+                        colnames(shdw.list) <- c("Variable", "Facet")
+                        return(shdw.list)
+                    }
+                    
+            agg.list <- lapply(names(data2), split.df, facet = facet)
+                
+            names(agg.list) <- names(data2)              ## name it
+            return(agg.list)
+        }
+
     
-### create layers and facets
-    histogram.bins.50 <- geom_histogram(aes(y = ..density..), bins =  50, alpha = .5)
-    histogram.bins.25 <- geom_histogram(aes(y = ..density..), bins =  25, alpha = .5)
-    density           <- geom_density(aes(color = PartyWinner), alpha = .1)
-    facet.PartyWinner <- facet_grid(. ~ PartyWinner)
-
 ### create the function to loop through in mapply()
-    make.dist.plot <- function(.data, x.name){
-        ggplot(data = .data,mapping = aes(x = Variable, fill = PartyWinner)) +
-        xlab(x.name) +
-        histogram.bins.50 +
-        density +
-        party.colors.1 +
-        party.colors.2 +
-        facet.PartyWinner
+    dist.plot <- function(.data, x.name){
+            ggplot(data = .data, mapping = aes(x = Variable, fill = Facet)) +
+            
+                xlab(x.name) +
+            
+            geom_histogram(aes(y = ..density..), bins =  50, alpha = .5) +
+            geom_density(aes(color = Facet), alpha = .1) +
+            
+                party.colors.1 +
+                party.colors.2 +
+            
+            facet_grid(. ~ Facet) +
+            geom_vline(data = .data,
+                       aes(xintercept = mean(Variable),linetype = "dashed"),
+                       size = 1) +
+            geom_vline(data = .data,
+                       aes(xintercept = median(Variable), linetype="solid"),
+                       size = 1) +
+            scale_linetype_identity(guide="legend", label = c("Mean", "Median"))
     }
 
 ### run mapply() on the list of data frames
-    distribution.plots <- mapply(FUN = make.dist.plot,
-                             .data = .new.df,
-                             x.name = names(.new.df),
+    distribution.plots <- mapply(FUN = dist.plot,
+                             .data = splits,
+                             x.name = names(splits),
                              SIMPLIFY = FALSE)
-    ### name the plots
-        names(distribution.plots) <- x.vars
-    
+    # ### name the plots
+    #     names(distribution.plots) <- cols
