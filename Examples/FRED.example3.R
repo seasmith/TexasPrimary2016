@@ -88,21 +88,11 @@ agg.2013 <- left_join(ur.2013, pcpi.2013, by = "CountyName") %>%
                                  x.name = names(split.agg.2013),
                                  SIMPLIFY = FALSE)
 
-
-### UnRate
-    distribution.plots$UnRate
-    
-### PCPI
-    distribution.plots$PCPI
-    
-### CLF
-    distribution.plots$CLF
-    
-### RP
-    distribution.plots$RP
-    
-### CLF_RP (CLF divided by RP)
-    distribution.plots$CLF_RP
+    distribution.plots$UnRate  ## UnRate
+    distribution.plots$PCPI    ## PCPI
+    distribution.plots$CLF     ## CLF
+    distribution.plots$RP      ## RP
+    distribution.plots$CLF_RP  ## CLF_RP
     
 
 # Scatterplot - UnRate ~ PCPI ---------------------------------------------
