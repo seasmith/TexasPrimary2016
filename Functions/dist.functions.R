@@ -16,7 +16,7 @@ split.agg <- function(data, facet = NULL){
     split.df <- function(x, facet){
         shdw.list <- data.frame()        ## to hold data in loop
         shdw.list <- data[,c(x, facet)]
-        colnames(shdw.list) <- c("Variable", facet)
+        colnames(shdw.list) <- c("Variable", "Facet")
         return(shdw.list)
     }
     

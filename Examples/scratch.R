@@ -14,25 +14,32 @@
 # split.agg(cols, facets) -------------------------------------------------
 
 
-    split.agg <- function(data, facet = NULL){
-            
-            if(!is.null(facet) & (facet %in% names(data))){
-                data2 <- data[, !names(data) %in% facet]
-            } else{
-                data2 <- data
-            }
-                    split.df <- function(x, facet){
-                        shdw.list <- data.frame()        ## to hold data in loop
-                        shdw.list <- data[,c(x, facet)]
-                        colnames(shdw.list) <- c("Variable", "Facet")
-                        return(shdw.list)
-                    }
-                    
-            agg.list <- lapply(names(data2), split.df, facet = facet)
-                
-            names(agg.list) <- names(data2)              ## name it
-            return(agg.list)
+split.agg <- function(data, facet = NULL){
+        
+        if(!is.null(facet) & (facet %in% names(data))){
+            data2 <- data[, !names(data) %in% facet]
+        } else{
+            data2 <- data
         }
+    
+                data2.names <- names(data2)
+    
+        split.df <- function(x, facet){
+            
+                    # x.name <- substitute(x)
+                    # facet.names <- substitute(facet)  ## if !is.null()
+            
+            shdw.list <- data.frame()        ## to hold data in loop
+            shdw.list <- data[,c(x, facet)]
+            colnames(shdw.list) <- c("Variable", facet)
+            return(shdw.list)
+        }
+        
+        agg.list <- lapply(data2.names, split.df, facet = facet)
+        
+        names(agg.list) <- data2.names              ## name it
+        return(agg.list)
+}
 
     
 ### create the function to loop through in mapply()
