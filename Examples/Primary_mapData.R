@@ -13,58 +13,37 @@ library(knitr)
 
 # Individual Republican Maps ----------------------------------------------
 
+plotsR.df <- lapply(select(tex.results, TurnOutR:dt), function(x) {
+    data.frame(region = tex.results$region, value = x, stringsAsFactors = FALSE)
+})
 
-#Ted Cruz
-tx.r.tc       <- tx.r.results
-tx.r.tc$value <- tx.r.results$tc
-choro_tc      <- county_choropleth(tx.r.tc, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Ted Cruz") +
-    coord_map()  # Adds a Mercator projection
-choro_tc
+plotsR <- lapply(plotsR.df, function(x) {
+    county_choropleth(df = x,
+                      state_zoom = "texas",
+                      legend = "%",
+                      num_colors = 1) +
+        coord_map()
+})
 
-#Donald Trump
-tx.r.dt       <- tx.r.results
-tx.r.dt$value <- tx.r.results$dt
-choro_dt = county_choropleth(tx.r.dt, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Donald Trump") +
-    coord_map()  # Adds a Mercator projection
-choro_dt
-
-#John Kasich
-tx.r.jk       <- tx.r.results
-tx.r.jk$value <- tx.r.results$jk
-choro_jk = county_choropleth(tx.r.jk, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("John Kasich") +
-    coord_map()  # Adds a Mercator projection
-choro_jk
-
-#Marco Rubio
-tx.r.mr       <- tx.r.results
-tx.r.mr$value <- tx.r.results$mr
-choro_mr = county_choropleth(tx.r.mr, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Marco Rubio") +
-    coord_map()  # Adds a Mercator projection
-choro_mr
+plotsR <- Map(function(x, y) x + ggtitle(y),
+              x = plotsR,
+              y = c("Turn Out: Republican", names(select(tex.results, Bush:Trump))))
 
 
 # Individual Democrat Maps ------------------------------------------------
 
 
-#Hillary Clinton
-tx.d.hc       <- tx.d.results
-tx.d.hc$value <- tx.d.results$hc
-choro_hc = county_choropleth(tx.d.hc, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Hillary Clinton") +
-    coord_map()  # Adds a Mercator projection
-choro_hc
+plotsD.df <- lapply(select(tex.results, TurnOutD:ww), function(x) {
+    data.frame(region = tex.results$region, value = x, stringsAsFactors = FALSE)
+})
 
-#Bernie Sanders
-tx.d.bs       <- tx.d.results
-tx.d.bs$value <- tx.d.results$bs
-choro_bs = county_choropleth(tx.d.bs, state_zoom="texas", legend = "%", num_colors=1) + 
-    ggtitle("Bernie Sanders") +
-    coord_map()  # Adds a Mercator projection
-choro_bs
+plotsD <- lapply(plotsD.df, function(x) {
+    county_choropleth(x, state_zoom = "texas", legend = "%", num_colors = 1) + coord_map()
+})
+
+plotsD <- Map(function(x, y) x + ggtitle(y),
+              x = plotsD,
+              y = c("Turn Out Democrat", names(select(tex.results, Clinton:Wilson))))
 
 
 # Party Comparison Maps ---------------------------------------------------

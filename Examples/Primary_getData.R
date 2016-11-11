@@ -6,7 +6,7 @@ library(rvest)
 library(dplyr)
 library(choroplethr)
 library(choroplethrMaps)
-library(gridExtra)
+# library(gridExtra)
 library(knitr)
 
 
@@ -39,6 +39,7 @@ tex.rep$CountyName <- gsub("lasalle", "la salle", tex.rep$CountyName)
 tex.rep <- mutate(tex.rep,
                 jb = (Bush/TotalVotes)*100,
                 bc = (Carson/TotalVotes)*100,
+                cc = (Christie/TotalVoters)*100,
                 tc = (Cruz/TotalVotes)*100,
                 cf = (Fiorina/TotalVotes)*100,
                 lg = (Graham/TotalVotes)*100,
@@ -49,7 +50,7 @@ tex.rep <- mutate(tex.rep,
                 mr = (Rubio/TotalVotes)*100,
                 rs = (Santorum/TotalVotes)*100,
                 dt = (Trump/TotalVotes)*100)
-tex.rep[,19:30] <- round(tex.rep[,19:30], digits = 2)
+tex.rep[,19:31] <- round(tex.rep[,19:31], digits = 2)
 
 
 # Democratic Data Table ---------------------------------------------------
@@ -111,40 +112,28 @@ rank.df <- function(df) {
 
 # Individual Republican Data Tables ---------------------------------------
 
+# Rank, find winners, find number of counties won, and names of those who won.
 rankR <- rank.df(tex.results[,2:14])
 rankR <- cbind(CountyName = tex.results[,1], rankR)
+countiesR <- lapply(rankR[,-1], function(x) rankR[x < 2, ])
+countiesR.won <- sapply(countiesR, function(x) nrow(x))
+countiesR.won.names <- names(countiesR.won[which(countiesR.won > 0)])
 
-# Data Table template
-# counties.Trump <- rankR[rankR$Trump == 1, ]
-
-#John Kasich
-jk.counties <- filter(tex.results, Kasich > Cruz & Kasich > Trump & Kasich > Rubio)
-kable(jk.counties, caption = "Counties won by Kasich")
-
-#Marco Rubio
-mr.counties <- filter(tex.results, Rubio > Cruz & Rubio > Trump & Rubio > Kasich)
-kable(mr.counties, caption = "Counties won by Rubio")
-
-#Donald Trump
-dt.counties <- filter(tex.results, Trump > Cruz & Trump > Rubio & Trump > Kasich) %>%
-    select(1,19:22)
-kable(dt.counties, caption = "Counties won by Trump")
-
-#Ted Cruz
-tc.counties <- filter(tex.results, Cruz > Trump & Cruz > Rubio & Cruz > Kasich)
-kable(tc.counties, caption = "Counties won by Cruz")
+winnersR <- lapply(countiesR.won.names, function(x) kable(countiesR[[x]]))
+names(winnersR) <- countiesR.won.names
 
 
 # Individual Democrat Data Table ------------------------------------------
 
 
-#Hillary Clinton
-hc.counties <- filter(tex.results, Clinton > Sanders & Clinton > OMalley)
-kable(hc.counties, caption = "Counties won by Clinton")
+rankD <- rank.df(tex.results[, 30:37])
+rankD <- cbind(CountyName = tex.results[,1], rankD)
+countiesD <- lapply(rankD[,-1], function(x) rankD[x < 2, ])
+countiesD.won <- sapply(countiesD, function(x) nrow(x))
+countiesD.won.names <- names(countiesD.won[which(countiesD.won > 0)])
 
-#Bernie Sanders
-bs.counties <- filter(tex.results, Sanders > Clinton & Sanders > OMalley)
-kable(bs.counties, caption = "Counties won by Sanders")
+winnersD <- lapply(countiesD.won.names, function(x) kable(countiesD[[x]]))
+names(winnersD) <- countiesD.won.names
 
 
 # Master Data Table -------------------------------------------------------
@@ -163,20 +152,6 @@ tex.results                 <- dplyr::rename(tex.results,
                                              TurnOutD    = TurnOut.y)
 tex.results                 <- tex.results[, -grep("TotalVoters.x|TotalVoters.y", names(tex.results))]
 tex.results                 <- left_join(tex.results, tx.regions, "CountyName")
-
-# These two have been abandoned in favor of TotalVotesR, TurnOutR, TotalVotesD,
-# and TurnOutD.
-# names(tex.results)[2:4]     <- c("RepVotes", "TotalVoters", "RepTurnOut")
-# names(tex.results)[c(9,11)] <- c("DemVotes", "DemTurnOut")
-
-# I don't know what this was.
-# tex.results                 <- select(tex.results, c(CountyName, TotalVotes, TotalVoters,
-#                                                      TotalTurnOut, RepVotes, RepTurnOut, RepShare,
-#                                                      jk, mr, dt, tc, DemVotes, DemTurnOut,
-#                                                      DemShare, hc, bs, mo, region))
-#turn out
-# tex.turnout       <- tex.results
-# tex.turnout$value <- tex.turnout$TotalTurnOut
 
 
 # Save Results ------------------------------------------------------------
