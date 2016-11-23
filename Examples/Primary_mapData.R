@@ -4,20 +4,23 @@
 
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(rvest)
 library(choroplethr)
 library(choroplethrMaps)
 library(gridExtra)
 library(knitr)
 
+df <- list()
+plots <- list()
 
 # Individual Republican Maps ----------------------------------------------
 
-plotsR.df <- lapply(select(tex.results, TurnOutR:dt), function(x) {
+df$R <- lapply(select(tex.results, TurnOutR:dt), function(x) {
     data.frame(region = tex.results$region, value = x, stringsAsFactors = FALSE)
 })
 
-plotsR <- lapply(plotsR.df, function(x) {
+plots$R <- lapply(df$R, function(x) {
     county_choropleth(df = x,
                       state_zoom = "texas",
                       legend = "%",
@@ -25,85 +28,112 @@ plotsR <- lapply(plotsR.df, function(x) {
         coord_map()
 })
 
-plotsR <- Map(function(x, y) x + ggtitle(y),
-              x = plotsR,
+plots$R <- Map(function(x, y) x + ggtitle(y),
+              x = plots$R,
               y = c("Turn Out: Republican", names(select(tex.results, Bush:Trump))))
 
 
 # Individual Democrat Maps ------------------------------------------------
 
 
-plotsD.df <- lapply(select(tex.results, TurnOutD:ww), function(x) {
+df$D <- lapply(select(tex.results, TurnOutD:ww), function(x) {
     data.frame(region = tex.results$region, value = x, stringsAsFactors = FALSE)
 })
 
-plotsD <- lapply(plotsD.df, function(x) {
+plots$D <- lapply(df$D, function(x) {
     county_choropleth(x, state_zoom = "texas", legend = "%", num_colors = 1) + coord_map()
 })
 
-plotsD <- Map(function(x, y) x + ggtitle(y),
-              x = plotsD,
+plots$D <- Map(function(x, y) x + ggtitle(y),
+              x = plots$D,
               y = c("Turn Out Democrat", names(select(tex.results, Clinton:Wilson))))
 
 
 # Party Comparison Maps ---------------------------------------------------
 
+# Who won?
+df$party.turnout <- tex.results[, c(1, grep("TurnOutR|TurnOutD", names(tex.results)))]
+df$party.winner <- apply(
+                         df$party.turnout[2:3],
+                         1,
+                         function(x) rank(-x)
+                         ) %>%
+                   t()
+df$party.winner[df$party.winner[, 1] == 1, 1] <- "Republican"
+df$party.winner[df$party.winner[, 1] == 2, 1] <- "Democrat"
+df$party.winner[, 2] <- tex.results$region
+df$party.winner      <- data.frame(value = df$party.winner[, 1],
+                                      region = as.numeric(df$party.winner[, 2]))
+names(df$party.winner) <- c("value", "region")
 
-#Republican counties won
-tex.counties.rep <- filter(tex.results, RepShare > DemShare)
-kable(tex.counties.rep, caption = "Counties won by Republicans")
+# Plot data frame
+plots$party.winner <- county_choropleth(df$party.winner,
+                                        state_zoom = "texas",
+                                        legend = "Winning Party",
+                                        num_colors = 2) +
+    coord_map() +
+    scale_fill_manual(values = c("#0000FF", "#FF0000")) +
+    labs(title = "Turn Out Winner by Party",
+         fill = "Party")
 
-tex.rep       <- tex.results
-tex.rep$value <- tex.rep$RepShare
-choro_rep     <- county_choropleth(tex.rep, state_zoom = "texas", legend = "%", num_colors = 1) +
-    ggtitle("Republican Counties") +
-    coord_map()
-choro_rep
+# Margin of victory
+df$party.margin <- (df$party.turnout$TurnOutR - df$party.turnout$TurnOutD) %>%
+    data.frame(value = .)
+df$party.margin$region <- tex.results$region
+plots$party.margin  <- county_choropleth(df$party.margin, state_zoom = "texas",
+                                            legend = "Margin of Victory",
+                                            num_colors = 9) +
+     coord_map() +
+     scale_fill_manual(values = c("#1E59D9", "#D91E1E"))
 
-#Democrat counites won
-tex.counties.dem <- filter(tex.results, DemShare > RepShare)
-kable(tex.counties.dem, caption = "Counties won by Democrats")
+# Margin of victory with range
+df$party.range <- data.frame(
+                             value = cut(
+                                 df$party.margin$value,
+                                 breaks = c(75, 50, 25, 5, 0, -5, -25, -50, -75),
+                                 include.lowest = TRUE),
+                             region = tex.results$region)
 
-tex.dem       <- tex.results
-tex.dem$value <- tex.results$DemShare
-choro_dem     <- county_choropleth(tex.dem, state_zoom = "texas", legend = "%", num_colors = 1) +
-    ggtitle("Democratic Turnout") +
-    coord_map()
-choro_dem
+plots$party.range <- county_choropleth(df$party.range,
+                                       state_zoom = "texas",
+                                       legend = "Margin of Victory",
+                                       num_colors = 9) +
+  coord_map() +
+  scale_fill_manual(values = c("#1E59D9", "#D91E1E"))
 
-#Party turnout winner
-t.tx        <- tex.results
-t.tx$winner <- as.factor(ifelse(t.tx$RepShare > t.tx$DemShare, "Republicans", "Democrats"))
-t.tx$value  <- t.tx$winner
-choro_party <- county_choropleth(t.tx, state_zoom = "texas", legend = "Winner", num_colors = 2) +
-    ggtitle("Texas Presidential Primary\n Republicans vs Democrats\n March 15, 2016") +
-    coord_map()
 
-#County turnout (both parties combined)
-choro_turnout     <- county_choropleth(tex.turnout, state_zoom = "texas", legend = "%", num_colors = 5) +
-    ggtitle("County Turnout") +
-    coord_map()
-choro_turnout
+# Candidate Comparison ----------------------------------------------------
 
+# Construst data frame
+candidates <- c("Bush", "Carson", "Christie", "Cruz", "Fiorina", "Graham", 
+                "Gray", "Huckabee", "Kasich", "Paul", "Rubio", "Santorum", "Trump", 
+                "Clinton", "De La Fuente", "Hawes", "Judd", "Locke", "OMalley", 
+                "Sanders", "Wilson")
+
+df$candidate.votes <- tex.results[, c("CountyName", candidates)]
+
+df$candidate.winner <- apply(df$candidate.votes[2:length(df$candidate.votes)],
+                             1,
+                             function(x) rank(-x)) %>%
+                       t() %>%
+                       data.frame()
+df$candidate.winner[, ncol(df$candidate.winner) + 1] <- tex.results$region
+df$candidate.winner <- df$candidate.winner %>% 
+                       gather(key = value, value = place, Bush:Wilson)
+df$candidate.winner <- df$candidate.winner[df$candidate.winner$place == 1, ]
+names(df$candidate.winner)[1] <- "region"
+
+# Plot
+plots$candidate.winner <- county_choropleth(df$candidate.winner, state_zoom = "texas",
+                                            legend = "Winning Candidate") +
+  coord_map() +
+  scale_fill_manual(values = c("#1D2951", "#8B0000", "#3FFF00", "#FF9F00")) +
+  labs(title = "Vote Winner by Candidate - Either Party",
+       fill = "Candidate")
 
 # Misc --------------------------------------------------------------------
 
 
 #Donald Trump vs Hillary Clinton
-grid.arrange(choro_dt, choro_hc, ncol = 2, top = "The Delegate Leaders")
 
 #Candidate with most votes (out of both parties)
-votes     <- tex.results[,c(1:14,23:29)]
-purevotes <- votes[,-1]
-winner    <- sapply(seq_along(purevotes$Bush), function(x){
-    
-    most <- max(purevotes[x,])
-    cand <- grep(most, purevotes[x,])
-    names(purevotes)[cand]
-})
-tex.results$winner <- winner
-tex.results$value  <- tex.results$winner
-choro_winner <- county_choropleth(tex.results, state_zoom = "texas", legend = "Winner", num_colors = 4) +
-    ggtitle("Leading Vote Getter: Republican or Democrat") +
-    coord_map()
-choro_winner
