@@ -25,7 +25,8 @@ plots$R <- lapply(df$R, function(x) {
                       state_zoom = "texas",
                       legend = "%",
                       num_colors = 1) +
-        coord_map()
+    coord_map() +
+    scale_fill_gradient(low = "#FFF0F0", high = "#8B0000")
 })
 
 plots$R <- Map(function(x, y) x + ggtitle(y),
@@ -83,8 +84,8 @@ df$party.margin$region <- tex.results$region
 plots$party.margin  <- county_choropleth(df$party.margin, state_zoom = "texas",
                                             legend = "Margin of Victory",
                                             num_colors = 9) +
-     coord_map() +
-     scale_fill_manual(values = c("#1E59D9", "#D91E1E"))
+     coord_map() #+
+     # scale_fill_manual(values = c("#1E59D9", "#D91E1E"))
 
 # Margin of victory with range
 df$party.range <- data.frame(
@@ -97,9 +98,10 @@ df$party.range <- data.frame(
 plots$party.range <- county_choropleth(df$party.range,
                                        state_zoom = "texas",
                                        legend = "Margin of Victory",
-                                       num_colors = 9) +
+                                       num_colors = 8) +
   coord_map() +
-  scale_fill_manual(values = c("#1E59D9", "#D91E1E"))
+  scale_fill_manual(values = c("#05005E", "#26208C", "#6C67D6",
+                               "#FFCFCF", "#ED8E8E", "#CC3737", "#8B0000"))
 
 
 # Candidate Comparison ----------------------------------------------------
