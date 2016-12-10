@@ -29,7 +29,7 @@ plots$R <- lapply(df$R, function(x) {
     scale_fill_gradient(low = "#FFF0F0", high = "#8B0000")
 })
 
-plots$R <- Map(function(x, y) x + ggtitle(y),
+plots$R <- Map(function(x, y) x + labs(title = y, fill = "% of Republican Votes"),
               x = plots$R,
               y = c("Turn Out: Republican", names(select(tex.results, Bush:Trump))))
 
@@ -45,7 +45,7 @@ plots$D <- lapply(df$D, function(x) {
     county_choropleth(x, state_zoom = "texas", legend = "%", num_colors = 1) + coord_map()
 })
 
-plots$D <- Map(function(x, y) x + ggtitle(y),
+plots$D <- Map(function(x, y) x + labs(title = y, fill = "% of Democrat Votes"),
               x = plots$D,
               y = c("Turn Out Democrat", names(select(tex.results, Clinton:Wilson))))
 
@@ -91,7 +91,7 @@ plots$party.margin  <- county_choropleth(df$party.margin, state_zoom = "texas",
 df$party.range <- data.frame(
                              value = cut(
                                  df$party.margin$value,
-                                 breaks = c(75, 50, 25, 5, 0, -5, -25, -50, -75),
+                                 breaks = c(75, 25, 10, 5, 0, -5, -10, -25, -75),
                                  include.lowest = TRUE),
                              region = tex.results$region)
 
@@ -100,7 +100,7 @@ plots$party.range <- county_choropleth(df$party.range,
                                        legend = "Margin of Victory",
                                        num_colors = 8) +
   coord_map() +
-  scale_fill_manual(values = c("#05005E", "#26208C", "#6C67D6",
+  scale_fill_manual(values = c("#05005E", "#26208C", "#6C67D6", "#BCF8FF",
                                "#FFCFCF", "#ED8E8E", "#CC3737", "#8B0000"))
 
 
@@ -132,6 +132,43 @@ plots$candidate.winner <- county_choropleth(df$candidate.winner, state_zoom = "t
   scale_fill_manual(values = c("#1D2951", "#8B0000", "#3FFF00", "#FF9F00")) +
   labs(title = "Vote Winner by Candidate - Either Party",
        fill = "Candidate")
+
+
+
+# Z Scores ----------------------------------------------------------------
+
+stats <- list()
+stats$zscores   <- list()
+
+# Data frame - Republican per county z-scores
+stats$zscores$R <- tex.results %>%
+  select(Bush:Uncommitted) %>%
+  apply(1, sd) %>%
+  data.frame(sd = .)
+
+stats$zscores$R$mean <- tex.results %>%
+  select(Bush:Uncommitted) %>%
+  apply(1, mean)
+
+stats$zscores$R <- tex.results %>%
+  select(Bush:Uncommitted) %>%
+  lapply(function(x) (x - stats$zscores$R$mean) / stats$zscores$R$sd) %>%
+  dplyr::bind_cols(stats$zscores$R)
+
+# Data frame - Democrat per county z-scores
+stats$zscores$D <- tex.results %>%
+  select(Clinton:Wilson) %>%
+  apply(1, sd) %>%
+  data.frame(sd = .)
+
+stats$zscores$D$mean <- tex.results %>%
+  select(Clinton:Wilson) %>%
+  apply(1, mean)
+
+stats$zscores$D <- tex.results %>%
+  select(Clinton:Wilson) %>%
+  lapply(function(x) (x - stats$zscores$D$mean) / stats$zscores$D$sd) %>%
+  dplyr::bind_cols(stats$zscores$D)
 
 # Misc --------------------------------------------------------------------
 

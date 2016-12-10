@@ -16,19 +16,20 @@ library(knitr)
 # Republican Data Table ---------------------------------------------------
 
 
-#download
-tex.rep            <- "http://elections.sos.state.tx.us/elchist273_race62.htm" %>%
-                      read_html() %>%
-                      html_nodes("table") %>%
-                      html_table() %>%
-                     `[[`(1)
+# Download - download Republican dataset
+tex.rep <- "http://elections.sos.state.tx.us/elchist273_race62.htm" %>%
+  read_html() %>%
+  html_nodes("table") %>%
+  html_table() %>%
+  `[[`(1)
 
-#set names
-r.first           <- names(tex.rep)
-r.last            <- tex.rep[1,]
-names(tex.rep)     <- c("CountyName", r.last[2:14], "Uncommitted", "TotalVotes", "TotalVoters", "TurnOut")
+# Annotate - set column names to last name of candidates, Uncommitted, etc.
+r.first        <- names(tex.rep)
+r.last         <- tex.rep[1,]
+names(tex.rep) <- c("CountyName", r.last[2:14], "Uncommitted", "TotalVotes", "TotalVoters", "TurnOut")
 
-#tidy up
+# Tidy - remove first three rows (column names and aggregate row), use lower case,
+#      - convert to numeric, remove CountyName spaces
 tex.rep            <- tex.rep[-(1:3),]
 tex.rep$CountyName <- tolower(as.character(tex.rep$CountyName))
 tex.rep[,2:17]     <- sapply(tex.rep[,2:17], function(x) as.numeric(gsub(",", "", x)))
@@ -49,7 +50,8 @@ tex.rep <- mutate(tex.rep,
                 rp = (Paul/TotalVotes)*100,
                 mr = (Rubio/TotalVotes)*100,
                 rs = (Santorum/TotalVotes)*100,
-                dt = (Trump/TotalVotes)*100)
+                dt = (Trump/TotalVotes)*100,
+                rnt2 = (RNotTop2/TotalVotes)*100)
 tex.rep[,19:31] <- round(tex.rep[,19:31], digits = 2)
 
 
