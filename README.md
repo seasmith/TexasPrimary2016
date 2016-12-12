@@ -1,12 +1,36 @@
-#The 2016 Texas Primary
+# The 2016 Texas Primary
 
 > Examination of the 2016 Texas Presidential Primary.
 
-### Info
-This repo is dedicated toward examining the data from the 2016 Texas Presidential Primary. Most of the code in `TexasPrimary2016.R` comes from [this post on R-Bloggers](http://www.r-bloggers.com/mapping-election-results-with-r-and-choroplethr/) (by way of [R. Duncan McIntosh](http://rduncanmcintosh.com/) and his [post on Ari Lamstein's blog](http://www.arilamstein.com/blog/2016/03/21/mapping-election-results-r-choroplethr/))  
-You will need to run the `TexasPrimary2016.R` script to run the examples in `examples.R`.
+## Presentations
+Check out the posts below if you want to see what I have been doing with the primary data. I have a couple posts on my [GitHub page](https://seasmith.github.io) as well as my [other site](https://protocolvital.info).
+
+#### [TexasPrimary2016: Z-Scores](https://seasmith.github.io/posts/texasprimary2016_update_with_zscores.html)
+12-12-2016  
+Adding a new stat: Z-Scores.
+
+<img src="https://seasmith.github.io/posts/texasprimary2016_update_with_zscores_files/figure-html/marco-1.png" width="600">
+
+#### [TexasPrimary2016: Update](https://seasmith.github.io/posts/texasprimary2016_update.html)
+11-21-2016  
+Refocusing on this once forgotten project on the 2016 Texas Presidential Primary.
+
+<img src="https://seasmith.github.io/posts/reference/candidate_winner.png", width="600">
+
+#### [R, FRED, and the 2016 Texas Primary: Part 3.1](https://protocolvital.info/2016/05/12/r-fred-and-the-2016-texas-primary-part-3-1/)
+05-12-2016
+
+<img src="https://protocolvitaldotinfo.files.wordpress.com/2016/05/unrate-pcpi-partywinner.png", width="600">
+
+#### [R, FRED, and the 2016 Texas Primary: Part 2](https://protocolvital.info/2016/04/26/r-fred-and-the-2016-texas-primary-part-2/)
+04-26-2016
+
+#### [R, FRED, and the 2016 Texas Primary: Part 1](https://protocolvital.info/2016/04/05/r-fred-and-the-2016-texas-primary-part-1/)
+04-05-2016
 
 ___
+
+__Update in progress: not all of the information in the sections below may be accurate__
 
 ### Election Data
 
@@ -46,3 +70,8 @@ ___
 
 ### Other data yet to come
 * `[FEC ftp server](ftp://ftp.fec.gov/FEC/)` = Federal Election Commission data (campaign finance)
+
+___
+### Misc
+This repo is dedicated toward examining the data from the 2016 Texas Presidential Primary. The inspiration for this project comes from [this post on R-Bloggers](http://www.r-bloggers.com/mapping-election-results-with-r-and-choroplethr/) (by way of [R. Duncan McIntosh](http://rduncanmcintosh.com/) and his [post on Ari Lamstein's blog](http://www.arilamstein.com/blog/2016/03/21/mapping-election-results-r-choroplethr/))  
+
