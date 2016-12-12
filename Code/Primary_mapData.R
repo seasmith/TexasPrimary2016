@@ -153,7 +153,43 @@ stats$zscores$R$mean <- tex.results %>%
 stats$zscores$R <- tex.results %>%
   select(Bush:Uncommitted) %>%
   lapply(function(x) (x - stats$zscores$R$mean) / stats$zscores$R$sd) %>%
-  dplyr::bind_cols(stats$zscores$R)
+  dplyr::bind_cols(stats$zscores$R,
+                   data.frame(TotalVotesR = tex.results$TotalVotesR),
+                   data.frame(Winner      = rankR$Winner,
+                              RunnerUp    = rankR$RunnerUp))
+
+# Plot
+
+stats$zscores$Rplot <- ggplot(stats$zscores$R,
+                              aes(x     = Cruz,
+                                  y     = Trump,
+                                  size  = TotalVotesR,
+                                  color = Winner)) +
+  ggtitle("Z-Score: Cruz vs Trump") +
+  geom_point(alpha = 3/5) +
+  scale_color_manual(values = c("blue", "red"))
+
+# Plot
+# stats$zscores$Rubio.v.Cruz_winner <- ggplot(stats$zscores$R,
+#                                    aes(x = Rubio,
+#                                        y = Cruz,
+#                                        size = TotalVotesR)) +
+#   geom_point() +
+#   facet_wrap(~ Winner, nrow = 2)
+
+stats$zscores$Rubio.v.Cruz_winner <- ggplot(stats$zscores$R,
+                                            aes(x = Rubio,
+                                                y = Cruz,
+                                                size = TotalVotesR,
+                                                color = Winner)) +
+  geom_point()
+
+stats$zscores$Rubio.v.Cruz_runnerup <- ggplot(stats$zscores$R,
+                                              aes(x = Rubio,
+                                                  y = Cruz,
+                                                  size = TotalVotesR,
+                                                  color = RunnerUp)) +
+  geom_point()
 
 # Data frame - Democrat per county z-scores
 stats$zscores$D <- tex.results %>%
@@ -168,7 +204,19 @@ stats$zscores$D$mean <- tex.results %>%
 stats$zscores$D <- tex.results %>%
   select(Clinton:Wilson) %>%
   lapply(function(x) (x - stats$zscores$D$mean) / stats$zscores$D$sd) %>%
-  dplyr::bind_cols(stats$zscores$D)
+  dplyr::bind_cols(stats$zscores$D,
+                   data.frame(TotalVotesD = tex.results$TotalVotesD),
+                   data.frame(Winner      = rankD$Winner)
+                   )
+
+stats$zscores$Dplot <- ggplot(stats$zscores$D,
+                              aes(x     = Clinton,
+                                  y     = Sanders,
+                                  size  = TotalVotesD,
+                                  color = Winner)) +
+  ggtitle("Z-Score: Clinton vs Sanders")
+  geom_point(alpha = 3/5) +
+  scale_color_manual(values = c("blue", "red", "purple"))
 
 # Misc --------------------------------------------------------------------
 
