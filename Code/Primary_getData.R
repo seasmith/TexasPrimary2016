@@ -1,13 +1,8 @@
 # Load Dependencies -------------------------------------------------------
 
 
-library(ggplot2)
 library(rvest)
 library(dplyr)
-library(choroplethr)
-library(choroplethrMaps)
-# library(gridExtra)
-library(knitr)
 library(seasmith)
 
 
@@ -18,105 +13,115 @@ library(seasmith)
 
 
 # Download - download Republican dataset
-tex.rep <- "http://elections.sos.state.tx.us/elchist273_race62.htm" %>%
+RVotesCount <- "http://elections.sos.state.tx.us/elchist273_race62.htm" %>%
   read_html() %>%
   html_nodes("table") %>%
   html_table() %>%
   `[[`(1)
 
 # Annotate - set column names to last name of candidates, Uncommitted, etc.
-r.first        <- names(tex.rep)
-r.last         <- tex.rep[1,]
-names(tex.rep) <- c("CountyName", r.last[getColNums(r.last, Jeb:`Donald J.`)], "Uncommitted", "TotalVotes", "TotalVoters", "TurnOut")
+r.first        <- names(RVotesCount)
+r.last         <- RVotesCount[1,]
+names(RVotesCount) <- c("CountyName", r.last[getColNums(r.last, Jeb:`Donald J.`)], "Uncommitted", "TotalVotes", "TotalVoters", "TurnOut")
 
 # Tidy - remove first three rows (column names and aggregate row), use lower case,
 #      - convert to numeric, remove CountyName spaces
-tex.rep            <- tex.rep[-(1:3),]
-tex.rep$CountyName <- tolower(as.character(tex.rep$CountyName))
-tex.rep[, getColNums(tex.rep, Bush:TotalVoters)] <- sapply(select(tex.rep, Bush:TotalVoters),
-                                                   function(x) as.numeric(gsub(",", "", x)))
-tex.rep[, "TurnOut"] <- sapply(tex.rep[, "TurnOut"],
-                               function(x) as.numeric(gsub("%", "", x)))
-tex.rep$CountyName <- gsub("lasalle", "la salle", tex.rep$CountyName)
-tex.rep$RNotTop2   <- tex.rep %>%
+RVotesCount            <- RVotesCount[-(1:3),]
+RVotesCount$CountyName <- tolower(as.character(RVotesCount$CountyName))
+RVotesCount[, getColNums(RVotesCount, Bush:TotalVoters)] <- sapply(select(RVotesCount, Bush:TotalVoters),
+                                                                   function(x) as.numeric(gsub(",", "", x)))
+RVotesCount[, "TurnOut"] <- sapply(RVotesCount[, "TurnOut"],
+                                   function(x) as.numeric(gsub("%", "", x)))
+RVotesCount$CountyName <- gsub("lasalle", "la salle", RVotesCount$CountyName)
+RVotesCount$NotTop2R   <- RVotesCount %>%
   select(Bush:Christie, Fiorina:Santorum, Uncommitted) %>%
   apply(1, sum)
-tex.rep            <- tex.rep %>%
-  select(CountyName:Uncommitted, RNotTop2, TotalVotes:TurnOut)
+RVotesCount            <- RVotesCount %>%
+  select(CountyName:Uncommitted, NotTop2R, TotalVotes:TurnOut)
 
 #add percent columns for top 4
-tex.rep <- mutate(tex.rep,
-                jb = (Bush/TotalVotes)*100,
-                bc = (Carson/TotalVotes)*100,
-                cc = (Christie/TotalVoters)*100,
-                tc = (Cruz/TotalVotes)*100,
-                cf = (Fiorina/TotalVotes)*100,
-                lg = (Graham/TotalVotes)*100,
-                eg = (Gray/TotalVotes)*100,
-                mh = (Huckabee/TotalVotes)*100,
-                jk = (Kasich/TotalVotes)*100,
-                rp = (Paul/TotalVotes)*100,
-                mr = (Rubio/TotalVotes)*100,
-                rs = (Santorum/TotalVotes)*100,
-                dt = (Trump/TotalVotes)*100,
-                rnt2 = (RNotTop2/TotalVotes)*100
-                )
-tex.rep[, getColNums(tex.rep, jb:rnt2)] <- round(select(tex.rep, jb:rnt2), digits = 2)
+RVotesPercent <- transmute(RVotesCount,
+                           CountyName = CountyName,
+                           Bush        = round((Bush/TotalVotes)*100, digits = 2),
+                           Carson      = round((Carson/TotalVotes)*100, digits = 2),
+                           Christie    = round((Christie/TotalVoters)*100, digits = 2),
+                           Cruz        = round((Cruz/TotalVotes)*100, digits = 2),
+                           Fiorina     = round((Fiorina/TotalVotes)*100, digits = 2),
+                           Graham      = round((Graham/TotalVotes)*100, digits = 2),
+                           Gray        = round((Gray/TotalVotes)*100, digits = 2),
+                           Huckabee    = round((Huckabee/TotalVotes)*100, digits = 2),
+                           Kasich      = round((Kasich/TotalVotes)*100, digits = 2),
+                           Paul        = round((Paul/TotalVotes)*100, digits = 2),
+                           Rubio       = round((Rubio/TotalVotes)*100, digits = 2),
+                           Santorum    = round((Santorum/TotalVotes)*100, digits = 2),
+                           Trump       = round((Trump/TotalVotes)*100, digits = 2),
+                           Uncommitted = round((Uncommitted/TotalVotes)*100, digits = 2),
+                           NotTop2R    = round((NotTop2R/TotalVotes)*100, digits = 2)
+)
 
+# Tidy - Change certain column names.
+nm.ndx <- getColNums(RVotesCount, TotalVotes, TotalVoters, TurnOut)
+names(RVotesCount)[nm.ndx] <- c("TotalVotesR", "TotalVotersR", "TurnOutR")
 
 # Democratic Data Table ---------------------------------------------------
 
 
 # Download - download Democrat dataset
-tex.dem <- "http://elections.sos.state.tx.us/elchist233_race62.htm" %>%
-            read_html() %>%
-            html_nodes("table") %>%
-            html_table() %>%
-            `[[`(1)
+DVotesCount <- "http://elections.sos.state.tx.us/elchist233_race62.htm" %>%
+  read_html() %>%
+  html_nodes("table") %>%
+  html_table() %>%
+  `[[`(1)
 
 # Annotate - set column names to last name of candidates, TotalVotes, etc
-d.first           <- names(tex.dem)
-d.last            <- tex.dem[1,]
-names(tex.dem)    <- c("CountyName", d.last[getColNums(d.last, Hillary:`Willie L.`)], "TotalVotes", "TotalVoters", "TurnOut")
-names(tex.dem)[3] <- "De_La_Fuente"
-names(tex.dem)[7] <- "OMalley"
+d.first           <- names(DVotesCount)
+d.last            <- DVotesCount[1,]
+names(DVotesCount)    <- c("CountyName", d.last[getColNums(d.last, Hillary:`Willie L.`)], "TotalVotes", "TotalVoters", "TurnOut")
+names(DVotesCount)[3] <- "De_La_Fuente"
+names(DVotesCount)[7] <- "OMalley"
 
 # Tidy - remove first three rows (column names and aggregate row), use lower case,
 #      - convert to numeric, remove CountyName spaces
-tex.dem            <- tex.dem[-(1:3),]
-tex.dem$CountyName <- tolower(as.character(tex.dem$CountyName))
-tex.dem[, getColNums(tex.dem, Clinton:TotalVoters)] <- sapply(select(tex.dem, Clinton:TotalVoters),
+DVotesCount            <- DVotesCount[-(1:3),]
+DVotesCount$CountyName <- tolower(as.character(DVotesCount$CountyName))
+DVotesCount[, getColNums(DVotesCount, Clinton:TotalVoters)] <- sapply(select(DVotesCount, Clinton:TotalVoters),
                                                               function(x) as.numeric(gsub(",", "", x)))
-tex.dem[, "TurnOut"] <- sapply(tex.dem[, "TurnOut"], function(x) as.numeric(gsub("%", "", x)))
-tex.dem$CountyName <- gsub("lasalle", "la salle", tex.dem$CountyName)
-tex.dem$DNotTop2   <- tex.dem %>%
+DVotesCount[, "TurnOut"] <- sapply(DVotesCount[, "TurnOut"], function(x) as.numeric(gsub("%", "", x)))
+DVotesCount$CountyName <- gsub("lasalle", "la salle", DVotesCount$CountyName)
+DVotesCount$NotTop2D   <- DVotesCount %>%
   select(De_La_Fuente:OMalley, Wilson) %>%
   apply(1, sum)
-tex.dem            <- tex.dem %>%
-  select(CountyName:Wilson, DNotTop2, TotalVotes:TurnOut)
+DVotesCount            <- DVotesCount %>%
+  select(CountyName:Wilson, NotTop2D, TotalVotes:TurnOut)
 
 #add percent columns for top 4
-tex.dem <- mutate(tex.dem,
-                  hc = (Clinton/TotalVotes)*100,
-                  rd = (De_La_Fuente/TotalVotes)*100,
-                  ch = (Hawes/TotalVotes)*100,
-                  kj = (Judd/TotalVotes)*100,
-                  sl = (Locke/TotalVotes)*100,
-                  mo = (OMalley/TotalVotes)*100,
-                  bs = (Sanders/TotalVotes)*100,
-                  ww = (Wilson/TotalVotes)*100,
-                  dnt2 = (DNotTop2/TotalVotes)*100
-                  )
-tex.dem[, getColNums(tex.dem, hc:dnt2)] <- round(select(tex.dem, hc:dnt2),
-                                                 digits = 2)
+DVotesPercent <- transmute(DVotesCount,
+                           CountyName = CountyName,
+                           Clinton      = round((Clinton/TotalVotes)*100, digits = 2),
+                           De_La_Fuente = round((De_La_Fuente/TotalVotes)*100, digits = 2),
+                           Hawes        = round((Hawes/TotalVotes)*100, digits = 2),
+                           Judd         = round((Judd/TotalVotes)*100, digits = 2),
+                           Locke        = round((Locke/TotalVotes)*100, digits = 2),
+                           OMalley      = round((OMalley/TotalVotes)*100, digits = 2),
+                           Sanders      = round((Sanders/TotalVotes)*100, digits = 2),
+                           Wilson       = round((Wilson/TotalVotes)*100, digits = 2),
+                           NotTop2D     = round((NotTop2D/TotalVotes)*100, digits = 2)
+)
 
-
+nm.ndx <- getColNums(DVotesCount, TotalVotes, TotalVoters, TurnOut)
+names(DVotesCount)[nm.ndx] <- c("TotalVotesD", "TotalVotersD", "TurnOutD")
 
 # Master Data Table -------------------------------------------------------
 
 
 #tidy up
-tex.results                 <- left_join(tex.rep, tex.dem, "CountyName")
+TotalVotesCount <- left_join(RVotesCount, DVotesCount, "CountyName")
+TotalVotesCount <- TotalVotesCount %>%
+  mutate(TotalVotesAll  = TotalVotesR + TotalVotesD,
+         TotalVotersAll = TotalVotersD,
+         TurnOutAll     = TurnOutR + TurnOutD) %>%
+  select(-TotalVotersD, -TotalVotersR)
+
 tex.results                 <- mutate(tex.results,
                                       TotalVoters  = TotalVoters.x,
                                       TotalVotes   = (TotalVotes.x + TotalVotes.y),
@@ -138,9 +143,9 @@ tex.results                 <- dplyr::rename(tex.results,
 
 # Rank the specified data frame or portion of the data frame.
 rank.df <- function(df) {
-    rs <- apply(df, 1, function(x) rank(-x))
-    df <- as.data.frame(t(rs))
-    return(df)
+  rs <- apply(df, 1, function(x) rank(-x))
+  df <- as.data.frame(t(rs))
+  return(df)
 }
 
 
@@ -161,17 +166,10 @@ RunnerUp <- apply(select(rankR, Bush:Uncommitted), 1, function(x) x == 2) %>%
 names(RunnerUp) <- tex.results$CountyName
 
 rankR <- cbind(CountyName = tex.results$CountyName,
-               Winner     = wR,
-               RunnerUp   = RunnerUp,
+               WinnerR    = wR,
+               RunnerUpR  = RunnerUp,
                rankR)
 rownames(rankR) <- NULL
-
-countiesR     <- lapply(rankR[, -(1:3)], function(x) rankR[x < 2, ])
-countiesR.won <- sapply(countiesR, function(x) nrow(x))
-countiesR.won.names <- names(countiesR.won[which(countiesR.won > 0)])
-
-winnersR <- lapply(countiesR.won.names, function(x) kable(countiesR[[x]]))
-names(winnersR) <- countiesR.won.names
 
 
 
@@ -202,16 +200,20 @@ names(ties) <- tex.results$CountyName
 
 wD <- Map(c, firsts, ties)
 rankD <- cbind(CountyName = tex.results[, 1],
-               Winner     = unlist(wD),
+               WinnerD    = unlist(wD),
                rankD)
 rownames(rankD) <- NULL
 
-countiesD     <- lapply(rankD[, -(1:2)], function(x) rankD[x < 2, ])
-countiesD.won <- sapply(countiesD, function(x) nrow(x))
-countiesD.won.names <- names(countiesD.won[which(countiesD.won > 0)])
 
-winnersD <- lapply(countiesD.won.names, function(x) kable(countiesD[[x]]))
-names(winnersD) <- countiesD.won.names
+
+# All Rankings ------------------------------------------------------------
+
+rankAll <- bind_cols(rankR, select(rankD, -CountyName))
+
+rankAll$PartyWinner <- tex.results %>%
+  select(TurnOutR, TurnOutD) %>%
+  max.col() %>%
+  c("Republican", "Democrat")[.]
 
 
 
@@ -235,3 +237,4 @@ save(tex.dem, file = file.path(dir.save, "tex.dem.RData"))
 save(tex.results, file = file.path(dir.save, "tex.results.RData"))
 save(rankR, file = file.path(dir.save, "rankR.RData"))
 save(rankD, file = file.path(dir.save, "rankD.RData"))
+save(rankAll, file = file.path(dir.save, "rankAll.RData"))
