@@ -3,6 +3,7 @@
 
 library(rvest)
 library(dplyr)
+library(tibble)
 library(seasmith)
 
 
@@ -115,12 +116,17 @@ names(DVotesCount)[nm.ndx] <- c("TotalVotesD", "TotalVotersD", "TurnOutD")
 
 
 #tidy up
-TotalVotesCount <- left_join(RVotesCount, DVotesCount, "CountyName")
+TotalVotesCount <- left_join(RVotesCount, DVotesCount, "CountyName") %>%
+  as_tibble()
+
 TotalVotesCount <- TotalVotesCount %>%
   mutate(TotalVotesAll  = TotalVotesR + TotalVotesD,
          TotalVotersAll = TotalVotersD,
          TurnOutAll     = TurnOutR + TurnOutD) %>%
   select(-TotalVotersD, -TotalVotersR)
+
+TotalVotesPercent <- left_join(RVotesPercent, DVotesPercent, "CountyName") %>%
+  as_tibble()
 
 tex.results                 <- mutate(tex.results,
                                       TotalVoters  = TotalVoters.x,

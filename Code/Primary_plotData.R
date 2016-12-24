@@ -2,6 +2,7 @@
 # Load Dependencies -------------------------------------------------------
 
 
+library(tibble)
 library(purrr)
 library(tidyr)
 library(dplyr)
@@ -114,3 +115,27 @@ counts.PartyWinner <- df %>%
   scale_color_manual(values = c("blue", "red"))
 
 multiplot(plotlist = counts.PartyWinner[[1]], cols = 2)
+
+rankAll_FRED <- rankAll %>%
+  select(CountyName, PartyWinner, WinnerR, WinnerD) %>%
+  left_join(FRED) %>%
+  select(-CountyName) %>%
+  gather(-PartyWinner, -WinnerR, -WinnerD, key = "key", value = "value")
+
+FRED_by_PartyWinner <- rankAll_FRED %>%
+  ggplot(aes(value, color = PartyWinner)) +
+  facet_wrap(~key + PartyWinner, scales = "free") +
+  geom_density() +
+  scale_color_manual(values = c("blue", "red"))
+
+FRED_by_WinnerR <- rankAll_FRED %>%
+  ggplot(aes(value, color = WinnerR)) +
+  facet_wrap(~key + WinnerR, scales = "free") +
+  geom_density() +
+  scale_color_manual(values = c("blue", "red"))
+
+FRED_by_WinnerD <- rankAll_FRED %>%
+  ggplot(aes(value, color = WinnerD)) +
+  facet_wrap(~key + WinnerD, scales = "free") +
+  geom_density() +
+  scale_color_manual(values = c("blue", "purple", "red"))
