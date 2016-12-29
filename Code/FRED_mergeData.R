@@ -3,6 +3,7 @@
 
 
 library(dplyr)
+library(tibble)
 load("~/R/TexasPrimary2016/Data/FRED/fred.tables.RData")
 load("~/R/TexasPrimary2016/Data/FRED/fred.series.RData")
 
@@ -62,7 +63,8 @@ FRED <- fred.series %>%
   select(SeriesID, CountyName) %>%
   inner_join(RP_2013, "SeriesID") %>%
   inner_join(FRED, "CountyName") %>%
-  select(CountyName, PCPI_2013, EMHI_2013, RP_2013)
+  select(CountyName, PCPI_2013, EMHI_2013, RP_2013) %>%
+  as_tibble()
 
 
 
