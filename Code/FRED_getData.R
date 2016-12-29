@@ -1,14 +1,20 @@
 
 # Load Dependencies -------------------------------------------------------
 
-
+# Packages
 library(rvest)
 library(plyr)
 library(dplyr)
-wd <- getwd() ## for sourcing and saving
-dir.create(file.path(wd, "Data"), showWarnings = FALSE) ## for saving
-dir.create(file.path(wd, "Data", "FRED"), showWarnings = FALSE) ## for saving
-source(file.path(wd,"Functions", "scraper.functions.R"))
+library(tibble)
+
+# Functions
+source('~/R/TexasPrimary2016/Functions/scraper.functions.R')
+
+# Directories
+dir.create("Data", showWarnings = FALSE)
+dir.create("Data/FRED", showWarnings = FALSE)
+
+# Variables
 myapi <- "" # set your API here
 
 
@@ -43,7 +49,8 @@ myapi <- "" # set your API here
                                            id     = fred.input1[x],
                                            filter = filter1)
         })
-    }) %>% ldply()
+    }) %>% ldply() %>%
+      as_tibble()
 
     ## set 2nd set of variables
         fred.input2 <- c("346")
@@ -63,12 +70,14 @@ myapi <- "" # set your API here
                                         id     = fred.input2[x],
                                         filter = filter2)
         })
-    }) %>% ldply()
+    }) %>% ldply() %>%
+      as_tibble()
 
 ## combine the two data frames and save
     fred.series <- rbind(fred.series1, fred.series2) %>%
-                   arrange(Release, Category, CountyName)
-    save(fred.series, file = file.path(wd, "Data", "FRED", "fred.series.RData"))
+      arrange(Release, Category, CountyName) %>%
+      as_tibble()
+    save(fred.series, file = "~/R/TexasPrimary2016/Data/FRED/fred.series.RData")
 
 
 # Run the Data Function ---------------------------------------------------
@@ -115,4 +124,4 @@ myapi <- "" # set your API here
 
 ## concatenate fred.obs[x] and save as one R object
     fred.obs <- c(fred.obs1, fred.obs2)
-    save(fred.obs, file = file.path(wd, "Data", "FRED", "fred.obs.RData"))
+    save(fred.obs, file = "~/R/TexasPrimary2016/Data/FRED/fred.obs.RData")

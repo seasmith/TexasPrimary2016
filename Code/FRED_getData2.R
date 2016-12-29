@@ -1,17 +1,23 @@
 
 # Load Dependencies -------------------------------------------------------
 
+# Packages
 library(plyr, quietly = T)
 library(dplyr, quietly = T)
 library(rvest, quietly = T)
 library(choroplethrMaps, quietly = T)
 library(lubridate, quietly = T)
-wd <- getwd() ## for sourcing and saving
-dir.create(file.path(wd, "Data", "TableFiles"), showWarnings = FALSE)
-source(file.path(wd, "Functions", "cat.functions.R"))
-load(file.path(wd, "Data", "FRED", "fred.series"))
-load(file.path(wd, "Data", "FRED", "fred.obs"))
+
+# Functions
+source("~/R/TexasPrimary2016/Functions/cat.functions.R")
+
+# Data
+load("~/R/TexasPrimary2016/Data/FRED/fred.series.RData")
+load("~/R/TexasPrimary2016/Data/FRED/fred.obs.RData")
 data("county.regions")
+
+# Directories
+dir.create("Data/TableFiles", showWarnings = FALSE)
 
 
 # Load Geo Data -----------------------------------------------------------
@@ -22,8 +28,8 @@ tx.regions <- filter(county.regions, state.name == "texas") %>%
 
 # Create Master Table -----------------------------------------------------
 
-fred.master <- cat.info(fred.series)
-save(fred.master, file = file.path(wd, "Data", "FRED", "fred.master.RData"))
+fred.master <- cat.info(fred.series) %>% as_tibble()
+save(fred.master, file = "~/R/TexasPrimary2016/Data/FRED/fred.master.RData")
 
 
 # All in one --------------------------------------------------------------
@@ -37,13 +43,13 @@ save(fred.master, file = file.path(wd, "Data", "FRED", "fred.master.RData"))
 # This function groups data frames by 'category'
 # It returns a list of 10 elements (corresponding to the 10 'category' values)
 # Each element has 254 data frames (one for each county)
-    fred.cat.list <- lapply(seq_along(fred.master$category), function(x){
+    fred.cat.list <- lapply(seq_along(fred.master$Category), function(x){
         obs.catcher(series.table = fred.series,
                     obs.list     = fred.obs,
-                    cat          = fred.master$category[x])
+                    cat          = fred.master$Category[x])
     })
-names(fred.cat.list) <- fred.master$category
-save(fred.cat.list, file = file.path(wd, "Data", "FRED", "fred.cat.list.RData"))
+names(fred.cat.list) <- fred.master$Category
+save(fred.cat.list, file = "~/R/TexasPrimary2016/Data/FRED/fred.cat.list.RData")
 
 # This function merges the data frames in each list element
 # The result is a massive data frame in each of the 10 list elements
@@ -52,13 +58,14 @@ save(fred.cat.list, file = file.path(wd, "Data", "FRED", "fred.cat.list.RData"))
     fred.tables <- lapply(seq_along(fred.cat.list), function(x){
         cat.tabler(fred.cat.list[[x]])
     })
-names(fred.tables) <- fred.master$category
+names(fred.tables) <- fred.master$Category
 # fred.tables   <- fred.tables %>% select(-1) %>% as.character() %>% as.numeric()
-save(fred.tables, file = file.path(wd, "Data", "FRED", "fred.tables.RData"))
+save(fred.tables, file = "~/R/TexasPrimary2016/Data/FRED/fred.tables.RData")
 
 # write all 10 data frames to a file
 # extension = ".txt"
 # separator = "," separator
-    lapply(seq_along(fred.tables), function(x){
+    write <- lapply(seq_along(fred.tables), function(x){
         write.table(fred.tables[[x]], file = paste("Data/TableFiles/", names(fred.tables[x]), ".txt", sep = ""), sep = ",", row.names = F)
     })
+    
