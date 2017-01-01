@@ -76,6 +76,7 @@ myapi <- "" # set your API here
 ## combine the two data frames and save
     fred.series <- rbind(fred.series1, fred.series2) %>%
       arrange(Release, Category, CountyName) %>%
+      mutate(SeriesID = as.character(SeriesID)) %>%
       as_tibble()
     save(fred.series, file = "~/R/TexasPrimary2016/Data/FRED/fred.series.RData")
 
