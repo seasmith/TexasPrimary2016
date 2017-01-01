@@ -28,7 +28,12 @@ tx.regions <- filter(county.regions, state.name == "texas") %>%
 
 # Create Master Table -----------------------------------------------------
 
-fred.master <- cat.info(fred.series) %>% as_tibble()
+fred.master <- fred.series %>%
+  select(Release:Category, Frequency:End) %>%
+  group_by(Category) %>%
+  summarise_each(funs(unique)) %>%
+  arrange(Release, Category)
+
 save(fred.master, file = "~/R/TexasPrimary2016/Data/FRED/fred.master.RData")
 
 

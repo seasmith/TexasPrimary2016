@@ -4,9 +4,10 @@
 cat.info <- function(series.table){
 
 ### one swift succession of code
-    summarized.series <- fred.series %>% select(2,3,6,7,8,9) %>%
-                         aggregate(list(series.table$Category), unique) %>% select(3,2,4:7) %>%
-                         arrange(Release, Category)
+    summarized.series <- fred.series %>% select(Release:Category, Frequency:End) %>%
+      aggregate(list(series.table$Category), unique) %>%
+      select(Category, Release, Frequency, Unites, Start, End) %>%
+      arrange(Release, Category)
 }
 
 
@@ -24,11 +25,15 @@ cat.info <- function(series.table){
 obs.catcher <- function(series.table, obs.list, cat){
     
 ### subset by category
-    cat.series               <- series.table[series.table$Category == cat, ]
+    cat.series               <- series.table %>%
+      filter(Category == cat) %>%
+      select(SeriesID) %>%
+      `[[`(1) %>%
+      as.character()
     
 ### Find all SeriesID matching the subset's SeriesID
     cat.obs <- list()
-    cat.obs <- obs.list[cat.series$SeriesID]
+    cat.obs <- obs.list[cat.series]
 }
 
 
