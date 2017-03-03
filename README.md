@@ -2,8 +2,16 @@
 
 > Examination of the 2016 Texas Presidential Primary.
 
-## Presentations
+## Blog Posts
 Check out the posts below if you want to see what I have been doing with the primary data. I have a couple posts on my [GitHub page](https://seasmith.github.io) as well as my [other site](https://protocolvital.info).
+
+#### [TexasPrimary2016: Economic Data - Part 1](https://seasmith.github.io/posts/texasprimary2016_economic_data_part_1.html)
+02-21-2017
+An initial look at Texas economic data related to the 2016 Texas presidential primary.
+
+<img src="https://seasmith.github.io/posts/texasprimary2016_economic_data_part_1_files/figure-html/Plot%205-1.png" width="600">
+
+<br>
 
 #### [TexasPrimary2016: Z-Scores](https://seasmith.github.io/posts/texasprimary2016_update_with_zscores.html)
 12-12-2016  
@@ -11,19 +19,27 @@ Adding a new stat: Z-Scores.
 
 <img src="https://seasmith.github.io/posts/texasprimary2016_update_with_zscores_files/figure-html/marco-1.png" width="600">
 
+<br>
+
 #### [TexasPrimary2016: Update](https://seasmith.github.io/posts/texasprimary2016_update.html)
 11-21-2016  
 Refocusing on this once forgotten project on the 2016 Texas Presidential Primary.
 
 <img src="https://seasmith.github.io/posts/reference/candidate_winner.png", width="600">
 
+<br>
+
 #### [R, FRED, and the 2016 Texas Primary: Part 3.1](https://protocolvital.info/2016/05/12/r-fred-and-the-2016-texas-primary-part-3-1/)
 05-12-2016
 
 <img src="https://protocolvitaldotinfo.files.wordpress.com/2016/05/unrate-pcpi-partywinner.png", width="600">
 
+<br>
+
 #### [R, FRED, and the 2016 Texas Primary: Part 2](https://protocolvital.info/2016/04/26/r-fred-and-the-2016-texas-primary-part-2/)
 04-26-2016
+
+<br>
 
 #### [R, FRED, and the 2016 Texas Primary: Part 1](https://protocolvital.info/2016/04/05/r-fred-and-the-2016-texas-primary-part-1/)
 04-05-2016
